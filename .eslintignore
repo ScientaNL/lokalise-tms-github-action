@@ -1,0 +1,7 @@
+dist/
+lib/
+node_modules/
+jest.config.js
+main.d.ts
+.github
+docs

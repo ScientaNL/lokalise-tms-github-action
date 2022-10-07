@@ -1,0 +1,14 @@
+name: Lokalise TMS GitHub Actions Demo
+on: [ push ]
+jobs:
+  lokalise:
+    runs-on: ubuntu-latest
+    steps:
+      - name: lokalise
+        uses: ./
+#        with:
+#          terms: ./messages.xlf, ./messages.json
+#          destinations: .
+#          destinationLocales: nl|en|de|fr
+#          lokaliseApi: ${{ secrets.LOKALISE_API }}
+#          lokaliseProject: ${{ secrets.LOKALISE_PROJECT }}

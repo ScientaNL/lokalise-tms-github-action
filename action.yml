@@ -1,0 +1,6 @@
+name: 'Lokalise TMS Github Action'
+description: "Scienta's take on Translation Management"
+author: 'Scienta'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
