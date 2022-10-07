@@ -1,0 +1,43 @@
+name: 'Lokalise TMS Github Action'
+description: "Scienta's take on Translation Management"
+author: 'Scienta'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'
+inputs:
+  command:
+    description: 'Command of the github action (extract, addSnapshot, createTranslationFiles)'
+    required: true
+  actions-rc:
+    description: 'actions rc (configuration) file'
+    required: true
+
+  repo:
+    description: 'The repository on which to execute'
+    required: true
+  owner:
+    description: 'The aforementioned repository owner'
+    required: true
+  pr_number:
+    description: 'The pull request number'
+    required: true
+
+  lokaliseApi:
+    description: 'Lokalise API key'
+    required: true
+  lokaliseProject:
+    description: 'Lokalise API project'
+    required: true
+
+  dynamoDBAccessKey:
+    description: 'AWS DynamoDB access key'
+    required: true
+  dynamoDBSecret:
+    description: 'AWS DynamoDB secret'
+    required: true
+  dynamoDBTable:
+    description: 'AWS DynamoDB table name'
+    required: true
+  AWSRegion:
+    description: 'AWS region'
+    required: true

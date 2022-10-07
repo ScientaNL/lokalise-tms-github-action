@@ -1,0 +1,38 @@
+terms:
+  - terms: ./test-workflows/sample-files/messages.xlf
+    type: xliff2
+    tag: angular
+  - terms: ./test-workflows/sample-files/messages.json
+    type: json
+    tag: json
+
+snapshots:
+  - tag: angular
+    importInLocales: [source, en_US]
+  - tag: json
+    importInLocales: [source, en_US]
+
+outputs:
+  - destination: ./test-workflows/sample-files/output.nl.json
+    type: json
+    sourceLocale:
+      tms: en_US
+      output: en-US
+    targetLocale:
+      tms: nl
+      output: nl
+    tag: json
+    useSourceOnEmpty: true
+  - destination: ./test-workflows/sample-files/output.nl.xlf
+    type: xliff2
+    sourceLocale:
+      tms: en_US
+      output: en-US
+    targetLocale:
+      tms: nl
+      output: nl
+    tag: angular
+    useSourceOnEmpty: true
+
+lokalise:
+  platforms: [web]

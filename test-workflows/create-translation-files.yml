@@ -1,0 +1,29 @@
+name: Create translation files from TMS data
+on:
+  release:
+    types: [ created ]
+jobs:
+  extract-translations:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: lokalise
+        uses: ./
+        with:
+          actions-rc: ./test-workflows/.translate-actionrc.yml
+          command: createTranslationFiles
+
+          lokaliseApi: ${{ secrets.LOKALISE_API }}
+          lokaliseProject: ${{ secrets.LOKALISE_PROJECT }}
+
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pr_number: ${{ github.event.number }}
+          owner: ScientaNL
+          repo: lokalise-tms-github-action
+
+          dynamoDBAccessKey: ${{ secrets.AWS_DYNAMODB_ACCESS_KEY_ID }}
+          dynamoDBSecret: ${{ secrets.AWS_DYNAMODB_SECRET_ACCESS_KEY }}
+          dynamoDBTable: translation-keys
+          AWSRegion: eu-west-3

@@ -1,0 +1,37 @@
+import { createHash } from "crypto";
+import { TranslationKey } from "../../translation-key.js";
+import { TermsReader } from "./terms-reader.js";
+
+interface JsonInput {
+	srcLang: string;
+	units: {
+		term: string,
+		location: string,
+	}[];
+}
+
+export class JsonReader implements TermsReader {
+	public parse(input: string): TranslationKey[] {
+		const contents: JsonInput = this.parseJson(input);
+
+		if (!contents?.units || !contents?.srcLang) {
+			throw new Error("Invalid json");
+		}
+
+		const keys: TranslationKey[] = [];
+		for (const inputKey of contents.units) {
+			keys.push({
+				keyId: createHash("md5").update(inputKey.term).digest('hex'),
+				originalId: inputKey.term,
+				term: inputKey.term,
+				srcLang: contents.srcLang,
+			});
+		}
+
+		return keys;
+	}
+
+	private parseJson(inputPath: string): JsonInput {
+		return JSON.parse(inputPath);
+	}
+}

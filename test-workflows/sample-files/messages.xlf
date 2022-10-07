@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<xliff version="2.0" xmlns="urn:oasis:names:tc:xliff:document:2.0" srcLang="en-GB">
+  <file id="ngi18n" original="ng.template">
+    <unit id="5448436224192241977">
+      <notes>
+        <note category="location">angular/acl-role.guard.ts:71,73</note>
+        <note category="location">angular/acl-role.guard.ts:71,73</note>
+      <note category="description">Open</note>
+      <note category="meaning">Open article button</note>
+      </notes>
+      <segment>
+        <source>You don&apos;t have the right credentials to perform this action. Please login.</source>
+      </segment>
+    </unit>
+    <unit id="1302098374772601844">
+      <notes>
+        <note category="location">angular/acl-role.guard.ts:71,73</note>
+      </notes>
+      <segment>
+        <source>You don&apos;t have the right credentials to perform this action.</source>
+      </segment>
+    </unit>
+    <unit id="6957630246885542764">
+      <notes>
+        <note category="location">&apos;&apos;angular/modules/file-upload/c&apos;&apos;omponents/file-upload.component.html:69,80</note>
+      </notes>
+      <segment>
+        <source>{VAR_PLURAL, plural, =1 {You can upload one file
+          with a maximum size of <ph id="0" equiv="INTERPOLATION"/>
+          } other {You can upload <ph id="1" equiv="INTERPOLATION_1"/> files at most
+          with a &apos;maximum size of <ph id="2" equiv="INTERPOLATION"/> each
+          }}</source>
+      </segment>
+    </unit>
+    <unit id="673783204554638566">
+      <notes>
+        <note category="location">angular/apps/scienta/modules/desktop/admin/contentEditor/components/panes/editor-pane-aside.component.html:306</note>
+      </notes>
+      <segment>
+        <source>Select <ph id="0" equiv="INTERPOLATION" disp="{{taxonomyType"/></source>
+      </segment>
+    </unit>
+    <unit id="7188308287608705726">
+      <notes>
+        <note category="location">angular/apps/scienta/modules/desktop/admin/acl/dataPrivileges/list/columns/data-privileges-list-column-groups.component.ts:70</note>
+      </notes>
+      <segment>
+        <source>(<ph id="0" equiv="INTERPOLATION" disp="{{groups.length"/> Groups &amp; users)</source>
+      </segment>
+    </unit>
+    <unit id="1188308287608705721">
+      <notes>
+        <note category="location">angular/apps/scienta/modules/desktop/admin/acl/dataPrivileges/list/columns/data-privileges-list-column-groups.component.ts:70</note>
+      </notes>
+      <segment>
+      <source>Please <pc id="0" equivStart="START_TAG_SPAN" equivEnd="CLOSE_TAG_SPAN" type="other" dispStart="&lt;span class=&quot;login&quot;
+        (click)=&quot;showLogin()&quot;
+      &gt;" dispEnd="&lt;/span&gt;">Login</pc> to view this widget </source>
+      </segment>
+    </unit>
+  </file>
+</xliff>

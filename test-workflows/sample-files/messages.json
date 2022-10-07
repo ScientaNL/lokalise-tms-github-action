@@ -1,0 +1,27 @@
+{
+  "srcLang": "en-GB",
+  "units": [
+    {
+      "term": "Export content",
+      "context": {
+        "domain": "messages"
+      },
+      "location": "\/app\/file.php:49"
+    },
+    {
+      "term": "Welcome to %s!",
+      "context": [],
+      "location": "\/app\/file.php:12"
+    },
+    {
+      "term": "You have been added to %s as a user",
+      "context": [],
+      "location": "\/scienta\/resources\/messageTemplates\/newUserCreatedWithPassword.twig:1"
+    },
+    {
+      "term": "The [productName] <a href=\"https:\/\/help\" target=\"_blank\">manual<\/a> offers a simple, quick introduction to all the features of [productName].",
+      "context": [],
+      "location": "\/app\/resources\/gotoManual.twig:1"
+    }
+  ]
+}
