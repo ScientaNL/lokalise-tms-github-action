@@ -1,0 +1,23 @@
+name: Lokalise TMS GitHub Actions Demo
+on:
+  pull_request:
+    types: [ opened, reopened, synchronize ]
+jobs:
+  lokalise:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: lokalise
+        uses: ./
+        with:
+          terms: ./messages.xlf, ./messages.json
+          destinations: .
+          destinationLocales: nl|en|de|fr
+          lokaliseApi: ${{ secrets.LOKALISE_API }}
+          lokaliseProject: ${{ secrets.LOKALISE_PROJECT }}
+          lokaliseSourceLanguageCode: source
+          mode: createDiff
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pr_number: ${{ github.event.number }}

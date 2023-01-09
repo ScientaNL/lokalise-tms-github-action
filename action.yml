@@ -4,3 +4,16 @@ author: 'Scienta'
 runs:
   using: 'node16'
   main: 'dist/index.js'
+inputs:
+  mode:
+    description: 'Mode of the github action (createDiff, appendDiff)'
+    required: true
+  terms:
+    description: 'Term inputs. Comma separated'
+    required: true
+  lokaliseApi:
+    description: 'Lokalise API key'
+    required: true
+  lokaliseProject:
+    description: 'Lokalise API project'
+    required: true
