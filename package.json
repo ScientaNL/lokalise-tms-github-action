@@ -5,7 +5,7 @@
 	"description": "Scienta's take on Translation Management",
 	"scripts": {
 		"build": "ncc build src/main.ts --target es2020 -o dist",
-		"action": "bin/act -b -W .test-workflows -C .",
+		"action": "bin/act -b -W .github -C . --secret-file .env push",
 		"build-act": "npm run build && npm run action"
 	},
 	"type": "module",
@@ -21,14 +21,21 @@
 	"license": "MIT",
 	"dependencies": {
 		"@actions/core": "^1.10.0",
+		"@actions/github": "^5.1.1",
+		"@actions/artifact": "^1.1.1",
 		"@lokalise/node-api": "^9.2.0",
-		"@ngx-i18nsupport/ngx-i18nsupport-lib": "^1.12.1"
+		"dedent": "^0.7.0",
+		"fast-xml-parser": "^4.0.12",
+		"xml-reader": "^2.4.3",
+		"fs-extra": "^11.1.0"
 	},
 	"devDependencies": {
+		"@types/dedent": "^0.7.0",
 		"@types/node": "^16.18.3",
 		"@typescript-eslint/eslint-plugin": "^5.43.0",
 		"@typescript-eslint/parser": "^5.43.0",
 		"@vercel/ncc": "^0.34.0",
+		"@types/fs-extra": "^11.0.1",
 		"eslint": "^8.27.0",
 		"eslint-config-prettier": "^8.5.0",
 		"eslint-import-resolver-typescript": "^3.5.2",
