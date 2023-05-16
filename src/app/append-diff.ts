@@ -31,9 +31,7 @@ export class AppendDiffApp {
 			const translations = await this.translationArtifacts.downloadTranslations();
 			console.log(translations);
 
-			// await this.tmsClient.createProjectKeys(
-			// 	Array.from(keysDefinition.newKeys.values()),
-			// );
+			await this.tmsClient.createProjectKeys(translations);
 		} catch (e) {
 			console.log(e);
 		}
