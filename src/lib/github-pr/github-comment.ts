@@ -23,6 +23,7 @@ export async function writeTranslationsToPR() {
 		issue_number: prId,
 	}) as any;
 
+
 	const translationsComment = prComments.data.find(
 		(comment) => comment.user.login === 'github-actions[bot]' && comment.body.includes("Translations: "),
 	);
