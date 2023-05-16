@@ -56145,22 +56145,22 @@ class TranslationArtifacts {
     }
     uploadTranslations(terms) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.PutCommand({
-                TableName: "dasd",
-                Item: {
-                    primaryKey: "VALUE_1",
-                    NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
-                },
-            }));
-            // const a  = await this.documentClient.send(
-            // 	new GetCommand({
+            // await this.documentClient.send(
+            // 	new PutCommand({
             // 		TableName: this.tableName,
-            // 		Key: {
-            // 			primaryKey: "VALUE_1"
-            // 		}
+            // 		Item: {
+            // 			primaryKey: "VALUE_1", // For example, 'Season': 2
+            // 			NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
+            // 		},
             // 	}),
             // );
-            // console.log(a);
+            const a = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
+                TableName: this.tableName,
+                Key: {
+                    primaryKey: "VALUE_1"
+                }
+            }));
+            console.log(a);
         });
     }
     downloadTranslations() {

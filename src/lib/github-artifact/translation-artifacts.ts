@@ -10,25 +10,25 @@ export class TranslationArtifacts {
 	}
 
 	public async uploadTranslations(terms: CreateKeyData[]): Promise<void> {
-		await this.documentClient.send(
-			new PutCommand({
-				TableName: "dasd",
-				Item: {
-					primaryKey: "VALUE_1", // For example, 'Season': 2
-					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
-				},
-			}),
-		);
-
-		// const a  = await this.documentClient.send(
-		// 	new GetCommand({
+		// await this.documentClient.send(
+		// 	new PutCommand({
 		// 		TableName: this.tableName,
-		// 		Key: {
-		// 			primaryKey: "VALUE_1"
-		// 		}
+		// 		Item: {
+		// 			primaryKey: "VALUE_1", // For example, 'Season': 2
+		// 			NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
+		// 		},
 		// 	}),
 		// );
-		// console.log(a);
+
+		const a  = await this.documentClient.send(
+			new GetCommand({
+				TableName: this.tableName,
+				Key: {
+					primaryKey: "VALUE_1"
+				}
+			}),
+		);
+		console.log(a);
 	}
 
 	public async downloadTranslations(): Promise<CreateKeyData[]> {
