@@ -1,4 +1,3 @@
-import { CreateTableCommand } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { CreateKeyData } from "@lokalise/node-api";
 
@@ -22,31 +21,10 @@ export class TranslationArtifacts {
 		// );
 
 		const a  = await this.documentClient.send(
-			new CreateTableCommand({
+			new GetCommand({
 				TableName: this.tableName,
-				KeySchema: [
-					{
-						AttributeName: "Artist",
-						KeyType: "HASH", //Partition key
-					},
-					{
-						AttributeName: "SongTitle",
-						KeyType: "RANGE" //Sort key
-					}
-				],
-				AttributeDefinitions: [
-					{
-						AttributeName: "Artist",
-						AttributeType: "S"
-					},
-					{
-						AttributeName: "SongTitle",
-						AttributeType: "S"
-					}
-				],
-				ProvisionedThroughput: {       // Only specified if using provisioned mode
-					ReadCapacityUnits: 1,
-					WriteCapacityUnits: 1
+				Key: {
+					"pr-id": "VALUE_1"
 				}
 			}),
 		);
