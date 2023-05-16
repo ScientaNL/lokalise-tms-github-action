@@ -14,8 +14,8 @@ export class TranslationArtifacts {
 			new PutCommand({
 				TableName: this.tableName,
 				Item: {
-					primaryKey: 135, // For example, 'Season': 2
-					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
+					"pr-id": 135,
+					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE",
 				},
 			}),
 		);
