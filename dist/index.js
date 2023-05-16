@@ -56125,8 +56125,8 @@ class ConfigParser {
 /* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
 /* harmony export */   "g": () => (/* binding */ TranslationArtifacts)
 /* harmony export */ });
-/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(15219);
-/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(23363);
+/* harmony import */ var _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_0__);
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -56154,10 +56154,31 @@ class TranslationArtifacts {
             // 		},
             // 	}),
             // );
-            const a = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
+            const a = yield this.documentClient.send(new _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_0__.CreateTableCommand({
                 TableName: this.tableName,
-                Key: {
-                    primaryKey: "VALUE_1"
+                KeySchema: [
+                    {
+                        AttributeName: "Artist",
+                        KeyType: "HASH", //Partition key
+                    },
+                    {
+                        AttributeName: "SongTitle",
+                        KeyType: "RANGE" //Sort key
+                    }
+                ],
+                AttributeDefinitions: [
+                    {
+                        AttributeName: "Artist",
+                        AttributeType: "S"
+                    },
+                    {
+                        AttributeName: "SongTitle",
+                        AttributeType: "S"
+                    }
+                ],
+                ProvisionedThroughput: {
+                    ReadCapacityUnits: 1,
+                    WriteCapacityUnits: 1
                 }
             }));
             console.log(a);
