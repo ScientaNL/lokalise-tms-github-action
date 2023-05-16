@@ -55992,9 +55992,7 @@ class AppendDiffApp {
             try {
                 const translations = yield this.translationArtifacts.downloadTranslations();
                 console.log(translations);
-                // await this.tmsClient.createProjectKeys(
-                // 	Array.from(keysDefinition.newKeys.values()),
-                // );
+                yield this.tmsClient.createProjectKeys(translations);
             }
             catch (e) {
                 console.log(e);
