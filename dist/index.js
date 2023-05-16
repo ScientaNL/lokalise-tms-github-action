@@ -24981,22 +24981,20 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 8169:
-/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+/***/ 9255:
+/***/ ((module, __webpack_exports__, __nccwpck_require__) => {
 
-
-// EXPORTS
-__nccwpck_require__.d(__webpack_exports__, {
-  "p": () => (/* binding */ CreateDiffApp)
-});
-
-// EXTERNAL MODULE: ./node_modules/@actions/artifact/lib/artifact-client.js
-var artifact_client = __nccwpck_require__(2605);
-// EXTERNAL MODULE: ./node_modules/@actions/core/lib/core.js
-var core = __nccwpck_require__(2186);
-// EXTERNAL MODULE: ./node_modules/fs-extra/lib/index.js
-var lib = __nccwpck_require__(5630);
-;// CONCATENATED MODULE: ./src/lib/github-artifact/upload-artifact.ts
+__nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__) => {
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "Y": () => (/* binding */ AppendDiffApp)
+/* harmony export */ });
+/* harmony import */ var _actions_artifact__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2605);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _lib_github_artifact_translation_artifacts_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9484);
+/* harmony import */ var _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(6682);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__]);
+_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__ = (__webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__)[0];
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -25007,62 +25005,54 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
     });
 };
 
-function uploadArtifact(artifactClient, artifactName, data, root = '/tmp') {
-    return __awaiter(this, void 0, void 0, function* () {
-        const artifactTmpFileName = `${artifactName}.json`;
-        yield (0,lib.outputJson)(`${root}/${artifactTmpFileName}`, data);
-        yield artifactClient.uploadArtifact(artifactName, [`${root}/${artifactTmpFileName}`], root);
-        yield (0,lib.remove)(`${root}/${artifactTmpFileName}`);
-    });
-}
-
-// EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
-var github = __nccwpck_require__(5438);
-;// CONCATENATED MODULE: ./src/lib/github-pr/github-comment.ts
-var github_comment_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 
 
-function writeTranslationsToPR() {
-    return github_comment_awaiter(this, void 0, void 0, function* () {
-        const octokit = (0,github.getOctokit)((0,core.getInput)('token'));
-        const prId = parseInt((0,core.getInput)('pr_number'));
-        const owner = (0,core.getInput)("owner");
-        const repo = (0,core.getInput)("repo");
-        const prComments = yield octokit.rest.issues.listComments({
-            owner,
-            repo,
-            issue_number: prId,
+
+class AppendDiffApp {
+    constructor() {
+        this.artifactClient = (0,_actions_artifact__WEBPACK_IMPORTED_MODULE_0__/* .create */ .U)();
+        this.tmsClient = new _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__/* .TMSClient */ .l((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("lokaliseApi"), (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("lokaliseProject"));
+        this.translationArtifacts = new _lib_github_artifact_translation_artifacts_js__WEBPACK_IMPORTED_MODULE_2__/* .TranslationArtifacts */ .g(this.artifactClient, parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)('pr_number')));
+    }
+    run() {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const translations = yield this.translationArtifacts.downloadTranslations();
+                console.log(translations);
+                // await this.tmsClient.createProjectKeys(
+                // 	Array.from(keysDefinition.newKeys.values()),
+                // );
+            }
+            catch (e) {
+                console.log(e);
+            }
         });
-        const translationsComment = prComments.data.find((comment) => comment.user.login === 'github-actions[bot]' && comment.body.includes("Translations: "));
-        if (translationsComment) {
-            yield octokit.rest.issues.updateComment({
-                owner: owner,
-                repo: repo,
-                comment_id: translationsComment.id,
-                body: 'Translations: ' + Math.random(),
-            });
-        }
-        else {
-            yield octokit.rest.issues.createComment({
-                owner: owner,
-                repo: repo,
-                issue_number: prId,
-                body: 'Translations: ' + Math.random(),
-            });
-        }
-    });
+    }
 }
 
-;// CONCATENATED MODULE: ./src/app/create-diff.ts
-var create_diff_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+});
+
+/***/ }),
+
+/***/ 5712:
+/***/ ((module, __webpack_exports__, __nccwpck_require__) => {
+
+__nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__) => {
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "p": () => (/* binding */ CreateDiffApp)
+/* harmony export */ });
+/* harmony import */ var _actions_artifact__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2605);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _lib_github_artifact_translation_artifacts_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(9484);
+/* harmony import */ var _lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(2723);
+/* harmony import */ var _lib_lokalise_api_source_terms_lokalise_keys_merger_js__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(3588);
+/* harmony import */ var _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(6682);
+/* harmony import */ var _lib_terms_container_js__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(2237);
+/* harmony import */ var _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(4539);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__]);
+_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__ = (__webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__)[0];
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -25071,24 +25061,54 @@ var create_diff_awaiter = (undefined && undefined.__awaiter) || function (thisAr
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
+
+
+
 
 
 
 
 class CreateDiffApp {
-    constructor() {
-        this.artifactClient = (0,artifact_client/* create */.U)();
+    constructor(termsFileConfigs) {
+        this.termsFileConfigs = termsFileConfigs;
+        this.artifactClient = (0,_actions_artifact__WEBPACK_IMPORTED_MODULE_0__/* .create */ .U)();
+        this.tmsClient = new _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__/* .TMSClient */ .l((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("lokaliseApi"), (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("lokaliseProject"));
+        this.translationArtifacts = new _lib_github_artifact_translation_artifacts_js__WEBPACK_IMPORTED_MODULE_2__/* .TranslationArtifacts */ .g(this.artifactClient, parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)('pr_number')));
     }
     run() {
-        return create_diff_awaiter(this, void 0, void 0, function* () {
-            const prId = parseInt((0,core.getInput)('pr_number'));
-            const artifactName = `translations-${prId}`;
-            yield uploadArtifact(this.artifactClient, artifactName, {});
-            yield writeTranslationsToPR();
+        return __awaiter(this, void 0, void 0, function* () {
+            const terms = yield this.readTerms();
+            try {
+                const tmsKeys = yield this.tmsClient.getProjectkeys();
+                const keysDefinition = _lib_lokalise_api_source_terms_lokalise_keys_merger_js__WEBPACK_IMPORTED_MODULE_6__/* .SourceTermsLokaliseKeysMerger.mergeUnitsInKeys */ .D.mergeUnitsInKeys(terms.getUnits(), tmsKeys, (0,_actions_core__WEBPACK_IMPORTED_MODULE_1__.getInput)("lokaliseSourceLanguageCode"));
+                const newKeys = Array.from(keysDefinition.newKeys.values());
+                if (!newKeys.length) {
+                    return;
+                }
+                yield this.translationArtifacts.uploadTranslations(newKeys);
+                yield (0,_lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_3__/* .writeTranslationsToPR */ .r)(newKeys, `➕ New translations:`);
+            }
+            catch (e) {
+                console.log(e);
+            }
+        });
+    }
+    readTerms() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const termContainersFilesMap = new Map();
+            for (const config of this.termsFileConfigs) {
+                const reader = yield _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_5__/* .ReaderFactory.factory */ .E.factory(config.input);
+                const termsContainer = yield reader.parse();
+                termContainersFilesMap.set(termsContainer, [reader.getFileType(), config]);
+            }
+            const termsContainers = [...termContainersFilesMap.keys()];
+            return _lib_terms_container_js__WEBPACK_IMPORTED_MODULE_7__/* .TermsContainer.merge */ .X.merge(...termsContainers);
         });
     }
 }
 
+});
 
 /***/ }),
 
@@ -25126,6 +25146,125 @@ class ConfigParser {
         }
         return configs;
     }
+}
+
+
+/***/ }),
+
+/***/ 9484:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "g": () => (/* binding */ TranslationArtifacts)
+/* harmony export */ });
+/* harmony import */ var fs_extra__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(5630);
+/* harmony import */ var fs_extra__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(fs_extra__WEBPACK_IMPORTED_MODULE_0__);
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+class TranslationArtifacts {
+    constructor(artifactClient, prId, storageRoot = '/tmp') {
+        this.artifactClient = artifactClient;
+        this.prId = prId;
+        this.storageRoot = storageRoot;
+    }
+    uploadTranslations(translations) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const artifactName = this.getArtifactName();
+            const artifactTmpFileName = `${artifactName}.json`;
+            yield (0,fs_extra__WEBPACK_IMPORTED_MODULE_0__.outputJson)(`${this.storageRoot}/${artifactTmpFileName}`, translations);
+            yield this.artifactClient.uploadArtifact(artifactName, [`${this.storageRoot}/${artifactTmpFileName}`], this.storageRoot);
+            yield (0,fs_extra__WEBPACK_IMPORTED_MODULE_0__.remove)(`${this.storageRoot}/${artifactTmpFileName}`);
+        });
+    }
+    getArtifactName() {
+        return `translations-${this.prId}`;
+    }
+    downloadTranslations() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const artifactName = this.getArtifactName();
+            const artifactTmpFileName = `${artifactName}.json`;
+            yield (0,fs_extra__WEBPACK_IMPORTED_MODULE_0__.ensureDir)(this.storageRoot);
+            const artifact = yield this.artifactClient.downloadArtifact(artifactName, this.storageRoot, { createArtifactFolder: false });
+            return yield (0,fs_extra__WEBPACK_IMPORTED_MODULE_0__.readJson)(`${artifact.downloadPath}/${artifactTmpFileName}`);
+        });
+    }
+}
+
+
+/***/ }),
+
+/***/ 2723:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "r": () => (/* binding */ writeTranslationsToPR)
+/* harmony export */ });
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
+/* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(5438);
+/* harmony import */ var _actions_github__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_actions_github__WEBPACK_IMPORTED_MODULE_1__);
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+function writeTranslationsToPR(keys, summaryText) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const octokit = (0,_actions_github__WEBPACK_IMPORTED_MODULE_1__.getOctokit)((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('token'));
+        const prId = parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('pr_number'));
+        const owner = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("owner");
+        const repo = (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("repo");
+        const commentText = createPRCommentBody(keys, summaryText);
+        const prComments = yield octokit.rest.issues.listComments({
+            owner,
+            repo,
+            issue_number: prId,
+        });
+        const translationsComment = prComments.data.find((comment) => comment.user.login === 'github-actions[bot]' && comment.body.includes(summaryText));
+        if (translationsComment) {
+            yield octokit.rest.issues.updateComment({
+                owner: owner,
+                repo: repo,
+                comment_id: translationsComment.id,
+                body: commentText,
+            });
+        }
+        else {
+            yield octokit.rest.issues.createComment({
+                owner: owner,
+                repo: repo,
+                issue_number: prId,
+                body: commentText,
+            });
+        }
+    });
+}
+function createPRCommentBody(keys, summaryText) {
+    const terms = keys.map(({ translations }) => {
+        var _a, _b;
+        return (_b = (_a = translations === null || translations === void 0 ? void 0 : translations.filter(({ language_iso, translation }) => language_iso === "source" && !!translation)) === null || _a === void 0 ? void 0 : _a.map(({ translation }) => translation)) === null || _b === void 0 ? void 0 : _b.map((translation) => `- ${translation}`);
+    });
+    return `
+<details>
+<summary>${summaryText}</summary>
+
+${terms.join('\n')}
+</details>
+	`;
 }
 
 
@@ -25595,14 +25734,11 @@ class ReaderFactory {
 __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__) => {
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(2186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _app_create_diff_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(8169);
-/* harmony import */ var _lib_config_parser_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5450);
-/* harmony import */ var _lib_lokalise_api_source_terms_lokalise_keys_merger_js__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(3588);
-/* harmony import */ var _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(6682);
-/* harmony import */ var _lib_terms_container_js__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(2237);
-/* harmony import */ var _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(4539);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__]);
-_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__ = (__webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__)[0];
+/* harmony import */ var _app_append_diff_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(9255);
+/* harmony import */ var _app_create_diff_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(5712);
+/* harmony import */ var _lib_config_parser_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(5450);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_app_append_diff_js__WEBPACK_IMPORTED_MODULE_1__, _app_create_diff_js__WEBPACK_IMPORTED_MODULE_2__]);
+([_app_append_diff_js__WEBPACK_IMPORTED_MODULE_1__, _app_create_diff_js__WEBPACK_IMPORTED_MODULE_2__] = __webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__);
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -25616,39 +25752,20 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 
 
 
-
-
-
 (() => __awaiter(void 0, void 0, void 0, function* () {
-    const configs = _lib_config_parser_js__WEBPACK_IMPORTED_MODULE_2__/* .ConfigParser.parse */ .G.parse();
+    const configs = _lib_config_parser_js__WEBPACK_IMPORTED_MODULE_3__/* .ConfigParser.parse */ .G.parse();
+    let app;
     switch ((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("mode")) {
         case "createDiff":
-            const app = new _app_create_diff_js__WEBPACK_IMPORTED_MODULE_1__/* .CreateDiffApp */ .p();
-            yield app.run();
+            app = new _app_create_diff_js__WEBPACK_IMPORTED_MODULE_2__/* .CreateDiffApp */ .p(configs);
             break;
         case "appendDiff":
+            app = new _app_append_diff_js__WEBPACK_IMPORTED_MODULE_1__/* .AppendDiffApp */ .Y();
             break;
         default:
             throw new Error("Invalid mode configured in the action");
     }
-    return;
-    const termContainersFilesMap = new Map();
-    for (const config of configs) {
-        const reader = yield _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_4__/* .ReaderFactory.factory */ .E.factory(config.input);
-        const termsContainer = yield reader.parse();
-        termContainersFilesMap.set(termsContainer, [reader.getFileType(), config]);
-    }
-    const termsContainers = [...termContainersFilesMap.keys()];
-    const merged = _lib_terms_container_js__WEBPACK_IMPORTED_MODULE_5__/* .TermsContainer.merge */ .X.merge(...termsContainers);
-    try {
-        const client = new _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__/* .TMSClient */ .l((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseApi"), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseProject"));
-        const tmsKeys = yield client.getProjectkeys();
-        const keysDefinition = _lib_lokalise_api_source_terms_lokalise_keys_merger_js__WEBPACK_IMPORTED_MODULE_6__/* .SourceTermsLokaliseKeysMerger.mergeUnitsInKeys */ .D.mergeUnitsInKeys(merged.getUnits(), tmsKeys, (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseSourceLanguageCode"));
-        yield client.createProjectKeys(Array.from(keysDefinition.newKeys.values()));
-    }
-    catch (e) {
-        console.log(e);
-    }
+    yield app.run();
 }))();
 
 });
