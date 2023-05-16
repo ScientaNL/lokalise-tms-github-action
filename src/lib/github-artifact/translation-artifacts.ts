@@ -10,7 +10,6 @@ export class TranslationArtifacts {
 	}
 
 	public async uploadTranslations(terms: CreateKeyData[]): Promise<void> {
-
 		await this.documentClient.send(
 			new UpdateCommand({
 				TableName: this.tableName,
