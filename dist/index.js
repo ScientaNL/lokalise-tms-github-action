@@ -56149,7 +56149,6 @@ class TranslationArtifacts {
                 TableName: this.tableName,
                 Item: {
                     primaryKey: "VALUE_1",
-                    sortKey: "VALUE_2",
                     NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
                 },
             }));

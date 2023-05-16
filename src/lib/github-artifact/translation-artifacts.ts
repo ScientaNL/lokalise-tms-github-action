@@ -15,7 +15,6 @@ export class TranslationArtifacts {
 				TableName: this.tableName,
 				Item: {
 					primaryKey: "VALUE_1", // For example, 'Season': 2
-					sortKey: "VALUE_2", // For example,  'Episode': 2 (only required if table has sort key)
 					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
 				},
 			}),
