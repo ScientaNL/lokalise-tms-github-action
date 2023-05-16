@@ -1,4 +1,4 @@
-import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { CreateKeyData } from "@lokalise/node-api";
 
 export class TranslationArtifacts {
@@ -18,16 +18,19 @@ export class TranslationArtifacts {
 					sortKey: "VALUE_2", // For example,  'Episode': 2 (only required if table has sort key)
 					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
 				},
-
-				// ExpressionAttributeNames: {
-				// 	"#terms": "terms",
-				// },
-				// UpdateExpression: "set coverage.#terms = :terms",
-				// ExpressionAttributeValues: {
-				// 	":terms": terms,
-				// },
 			}),
 		);
+
+		const a  = await this.documentClient.send(
+			new GetCommand({
+				TableName: this.tableName,
+				Key: {
+					primaryKey: "VALUE_1"
+				}
+			}),
+		);
+
+		console.log(a);
 	}
 
 	public async downloadTranslations(): Promise<CreateKeyData[]> {
