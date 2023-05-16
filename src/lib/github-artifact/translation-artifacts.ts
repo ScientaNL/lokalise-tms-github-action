@@ -24,7 +24,7 @@ export class TranslationArtifacts {
 			new GetCommand({
 				TableName: this.tableName,
 				Key: {
-					"pr-id": "VALUE_1"
+					"pr-id": 135
 				}
 			}),
 		);

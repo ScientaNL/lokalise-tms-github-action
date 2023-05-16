@@ -56157,7 +56157,7 @@ class TranslationArtifacts {
             const a = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
                 TableName: this.tableName,
                 Key: {
-                    "pr-id": "VALUE_1"
+                    "pr-id": 135
                 }
             }));
             console.log(a);
