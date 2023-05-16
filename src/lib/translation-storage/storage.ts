@@ -1,7 +1,7 @@
 import { DynamoDBDocumentClient, GetCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { CreateKeyData } from "@lokalise/node-api";
 
-export class TranslationArtifacts {
+export class Storage {
 	constructor(
 		private readonly documentClient: DynamoDBDocumentClient,
 		private readonly tableName: string,

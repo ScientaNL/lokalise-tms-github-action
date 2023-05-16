@@ -1,15 +1,14 @@
-import { create } from "@actions/artifact";
 import { getInput } from "@actions/core";
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { TermsFileConfig } from "../lib/config-parser.js";
-import { TranslationArtifacts } from "../lib/github-artifact/translation-artifacts.js";
+import { Storage } from "../lib/translation-storage/storage.js";
 import { writeTranslationsToPR } from "../lib/github-pr/github-comment.js";
 import { SourceTermsLokaliseKeysMerger } from "../lib/lokalise-api/source-terms-lokalise-keys-merger.js";
 import { TMSClient } from "../lib/lokalise-api/tms-client.js";
 import { TermsContainer } from "../lib/terms-container.js";
 import { FileTypesEnum } from "../lib/translation-files/file-types.enum.js";
 import { ReaderFactory } from "../lib/translation-files/reader-factory.js";
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, GetCommandOutput, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 export class CreateDiffApp {
 	private readonly dynamoDBClient = DynamoDBDocumentClient.from(
@@ -27,7 +26,7 @@ export class CreateDiffApp {
 		getInput("lokaliseProject"),
 	);
 
-	private readonly translationArtifacts = new TranslationArtifacts(
+	private readonly translationArtifacts = new Storage(
 		this.dynamoDBClient,
 		getInput("dynamoDBTable"),
 		parseInt(getInput('pr_number')),
@@ -56,7 +55,6 @@ export class CreateDiffApp {
 			}
 
 			await this.translationArtifacts.uploadTranslations(newKeys);
-			console.log(234);
 			await writeTranslationsToPR(newKeys, `➕ New translations:`);
 		} catch (e) {
 			console.error(e);

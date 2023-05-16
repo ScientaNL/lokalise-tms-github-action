@@ -55953,9 +55953,14 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__) => {
 /* harmony export */ });
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(42186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(6682);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_1__]);
-_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_1__ = (__webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__)[0];
+/* harmony import */ var _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(23363);
+/* harmony import */ var _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_4__);
+/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(15219);
+/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(6682);
+/* harmony import */ var _lib_translation_storage_storage_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(40217);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_2__]);
+_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_2__ = (__webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__)[0];
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -55967,15 +55972,26 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 };
 
 
+
+
+
 class AppendDiffApp {
     constructor() {
-        this.tmsClient = new _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_1__/* .TMSClient */ .l((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseApi"), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseProject"));
+        this.dynamoDBClient = _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1__.DynamoDBDocumentClient.from(new _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_4__.DynamoDBClient({
+            credentials: {
+                accessKeyId: (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("dynamoDBAccessKey"),
+                secretAccessKey: (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("dynamoDBSecret"),
+            },
+            region: (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("AWSRegion"),
+        }));
+        this.tmsClient = new _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_2__/* .TMSClient */ .l((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseApi"), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseProject"));
+        this.translationArtifacts = new _lib_translation_storage_storage_js__WEBPACK_IMPORTED_MODULE_3__/* .Storage */ .K(this.dynamoDBClient, (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("dynamoDBTable"), parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('pr_number')));
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                // const translations = await this.translationArtifacts.downloadTranslations();
-                // console.log(translations);
+                const translations = yield this.translationArtifacts.downloadTranslations();
+                console.log(translations);
                 // await this.tmsClient.createProjectKeys(
                 // 	Array.from(keysDefinition.newKeys.values()),
                 // );
@@ -56000,18 +56016,18 @@ __nccwpck_require__.a(module, async (__webpack_handle_async_dependencies__) => {
 /* harmony export */ });
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(42186);
 /* harmony import */ var _actions_core__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_actions_core__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _lib_github_artifact_translation_artifacts_js__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(79484);
-/* harmony import */ var _lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(62723);
-/* harmony import */ var _lib_lokalise_api_source_terms_lokalise_keys_merger_js__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(53588);
-/* harmony import */ var _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(6682);
-/* harmony import */ var _lib_terms_container_js__WEBPACK_IMPORTED_MODULE_8__ = __nccwpck_require__(42237);
-/* harmony import */ var _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(24539);
 /* harmony import */ var _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_6__ = __nccwpck_require__(23363);
 /* harmony import */ var _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_6___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_6__);
-/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(15219);
-/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_5___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_5__);
-var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__]);
-_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__ = (__webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__)[0];
+/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1__ = __nccwpck_require__(15219);
+/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _lib_translation_storage_storage_js__WEBPACK_IMPORTED_MODULE_2__ = __nccwpck_require__(40217);
+/* harmony import */ var _lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_3__ = __nccwpck_require__(62723);
+/* harmony import */ var _lib_lokalise_api_source_terms_lokalise_keys_merger_js__WEBPACK_IMPORTED_MODULE_7__ = __nccwpck_require__(53588);
+/* harmony import */ var _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__ = __nccwpck_require__(6682);
+/* harmony import */ var _lib_terms_container_js__WEBPACK_IMPORTED_MODULE_8__ = __nccwpck_require__(42237);
+/* harmony import */ var _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_5__ = __nccwpck_require__(24539);
+var __webpack_async_dependencies__ = __webpack_handle_async_dependencies__([_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__]);
+_lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__ = (__webpack_async_dependencies__.then ? await __webpack_async_dependencies__ : __webpack_async_dependencies__)[0];
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -56033,15 +56049,15 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
 class CreateDiffApp {
     constructor(termsFileConfigs) {
         this.termsFileConfigs = termsFileConfigs;
-        this.dynamoDBClient = _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_5__.DynamoDBDocumentClient.from(new _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_6__.DynamoDBClient({
+        this.dynamoDBClient = _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_1__.DynamoDBDocumentClient.from(new _aws_sdk_client_dynamodb__WEBPACK_IMPORTED_MODULE_6__.DynamoDBClient({
             credentials: {
                 accessKeyId: (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("dynamoDBAccessKey"),
                 secretAccessKey: (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("dynamoDBSecret"),
             },
             region: (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("AWSRegion"),
         }));
-        this.tmsClient = new _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_3__/* .TMSClient */ .l((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseApi"), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseProject"));
-        this.translationArtifacts = new _lib_github_artifact_translation_artifacts_js__WEBPACK_IMPORTED_MODULE_1__/* .TranslationArtifacts */ .g(this.dynamoDBClient, (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("dynamoDBTable"), parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('pr_number')));
+        this.tmsClient = new _lib_lokalise_api_tms_client_js__WEBPACK_IMPORTED_MODULE_4__/* .TMSClient */ .l((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseApi"), (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("lokaliseProject"));
+        this.translationArtifacts = new _lib_translation_storage_storage_js__WEBPACK_IMPORTED_MODULE_2__/* .Storage */ .K(this.dynamoDBClient, (0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)("dynamoDBTable"), parseInt((0,_actions_core__WEBPACK_IMPORTED_MODULE_0__.getInput)('pr_number')));
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
@@ -56054,8 +56070,7 @@ class CreateDiffApp {
                     return;
                 }
                 yield this.translationArtifacts.uploadTranslations(newKeys);
-                console.log(234);
-                yield (0,_lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_2__/* .writeTranslationsToPR */ .r)(newKeys, `➕ New translations:`);
+                yield (0,_lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_3__/* .writeTranslationsToPR */ .r)(newKeys, `➕ New translations:`);
             }
             catch (e) {
                 console.error(e);
@@ -56066,7 +56081,7 @@ class CreateDiffApp {
         return __awaiter(this, void 0, void 0, function* () {
             const termContainersFilesMap = new Map();
             for (const config of this.termsFileConfigs) {
-                const reader = yield _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_4__/* .ReaderFactory.factory */ .E.factory(config.input);
+                const reader = yield _lib_translation_files_reader_factory_js__WEBPACK_IMPORTED_MODULE_5__/* .ReaderFactory.factory */ .E.factory(config.input);
                 const termsContainer = yield reader.parse();
                 termContainersFilesMap.set(termsContainer, [reader.getFileType(), config]);
             }
@@ -56113,58 +56128,6 @@ class ConfigParser {
             });
         }
         return configs;
-    }
-}
-
-
-/***/ }),
-
-/***/ 79484:
-/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
-
-/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
-/* harmony export */   "g": () => (/* binding */ TranslationArtifacts)
-/* harmony export */ });
-/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(15219);
-/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__);
-var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-class TranslationArtifacts {
-    constructor(documentClient, tableName, prId) {
-        this.documentClient = documentClient;
-        this.tableName = tableName;
-        this.prId = prId;
-    }
-    uploadTranslations(terms) {
-        return __awaiter(this, void 0, void 0, function* () {
-            yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.PutCommand({
-                TableName: this.tableName,
-                Item: {
-                    "pr-id": this.prId,
-                    terms: terms,
-                },
-            }));
-        });
-    }
-    downloadTranslations() {
-        var _a, _b;
-        return __awaiter(this, void 0, void 0, function* () {
-            const response = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
-                TableName: this.tableName,
-                Key: {
-                    "pr-id": this.prId,
-                }
-            }));
-            return (_b = (_a = response.Item) === null || _a === void 0 ? void 0 : _a.terms) !== null && _b !== void 0 ? _b : [];
-        });
     }
 }
 
@@ -56692,6 +56655,58 @@ class ReaderFactory {
             default:
                 throw new Error(`invalid file type. Could not parse ${path}`);
         }
+    }
+}
+
+
+/***/ }),
+
+/***/ 40217:
+/***/ ((__unused_webpack_module, __webpack_exports__, __nccwpck_require__) => {
+
+/* harmony export */ __nccwpck_require__.d(__webpack_exports__, {
+/* harmony export */   "K": () => (/* binding */ Storage)
+/* harmony export */ });
+/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__ = __nccwpck_require__(15219);
+/* harmony import */ var _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__nccwpck_require__.n(_aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__);
+var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+class Storage {
+    constructor(documentClient, tableName, prId) {
+        this.documentClient = documentClient;
+        this.tableName = tableName;
+        this.prId = prId;
+    }
+    uploadTranslations(terms) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.PutCommand({
+                TableName: this.tableName,
+                Item: {
+                    "pr-id": this.prId,
+                    terms: terms,
+                },
+            }));
+        });
+    }
+    downloadTranslations() {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
+                TableName: this.tableName,
+                Key: {
+                    "pr-id": this.prId,
+                }
+            }));
+            return (_b = (_a = response.Item) === null || _a === void 0 ? void 0 : _a.terms) !== null && _b !== void 0 ? _b : [];
+        });
     }
 }
 
