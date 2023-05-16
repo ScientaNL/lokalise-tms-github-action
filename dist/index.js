@@ -56152,26 +56152,18 @@ class TranslationArtifacts {
                     terms: terms,
                 },
             }));
-            const a = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
+        });
+    }
+    downloadTranslations() {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            const response = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
                 TableName: this.tableName,
                 Key: {
                     "pr-id": this.prId,
                 }
             }));
-            console.log(a.Item);
-        });
-    }
-    downloadTranslations() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // const artifactName = this.getArtifactName();
-            // const artifactTmpFileName = `${artifactName}.json`;
-            //
-            // await ensureDir(this.storageRoot);
-            //
-            // const artifact = await this.artifactClient.downloadArtifact(artifactName, this.storageRoot, {createArtifactFolder: false});
-            //
-            // return await readJson(`${artifact.downloadPath}/${artifactTmpFileName}`);
-            return [];
+            return (_b = (_a = response.Item) === null || _a === void 0 ? void 0 : _a.terms) !== null && _b !== void 0 ? _b : [];
         });
     }
 }

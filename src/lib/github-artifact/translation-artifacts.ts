@@ -19,8 +19,10 @@ export class TranslationArtifacts {
 				},
 			}),
 		);
+	}
 
-		const a = await this.documentClient.send(
+	public async downloadTranslations(): Promise<CreateKeyData[]> {
+		const response = await this.documentClient.send(
 			new GetCommand({
 				TableName: this.tableName,
 				Key: {
@@ -28,19 +30,7 @@ export class TranslationArtifacts {
 				}
 			}),
 		);
-		console.log(a.Item);
-	}
 
-	public async downloadTranslations(): Promise<CreateKeyData[]> {
-		// const artifactName = this.getArtifactName();
-		// const artifactTmpFileName = `${artifactName}.json`;
-		//
-		// await ensureDir(this.storageRoot);
-		//
-		// const artifact = await this.artifactClient.downloadArtifact(artifactName, this.storageRoot, {createArtifactFolder: false});
-		//
-		// return await readJson(`${artifact.downloadPath}/${artifactTmpFileName}`);
-
-		return [];
+		return response.Item?.terms ?? [];
 	}
 }
