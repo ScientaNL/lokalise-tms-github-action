@@ -5,6 +5,13 @@ runs:
   using: 'node16'
   main: 'dist/index.js'
 inputs:
+  mode:
+    description: 'Mode of the github action (createDiff, appendDiff)'
+    required: true
+  terms:
+    description: 'Term inputs. Comma separated'
+    required: true
+
   repo:
     description: 'The repository on which to execute'
     required: true
@@ -15,13 +22,6 @@ inputs:
     description: 'The pull request number'
     required: true
 
-  mode:
-    description: 'Mode of the github action (createDiff, appendDiff)'
-    required: true
-
-  terms:
-    description: 'Term inputs. Comma separated'
-    required: true
   lokaliseApi:
     description: 'Lokalise API key'
     required: true
