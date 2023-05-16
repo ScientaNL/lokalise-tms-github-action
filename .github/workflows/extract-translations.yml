@@ -24,3 +24,8 @@ jobs:
           pr_number: ${{ github.event.number }}
           owner: ScientaNL
           repo: lokalise-tms-github-action
+
+          dynamoDBAccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          dynamoDBSecret: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          dynamoDBTable: translation-keys
+          AWSRegion: eu-west-3
