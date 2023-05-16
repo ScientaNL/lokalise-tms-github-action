@@ -21,16 +21,15 @@ export class TranslationArtifacts {
 			}),
 		);
 
-		const a  = await this.documentClient.send(
-			new GetCommand({
-				TableName: this.tableName,
-				Key: {
-					primaryKey: "VALUE_1"
-				}
-			}),
-		);
-
-		console.log(a);
+		// const a  = await this.documentClient.send(
+		// 	new GetCommand({
+		// 		TableName: this.tableName,
+		// 		Key: {
+		// 			primaryKey: "VALUE_1"
+		// 		}
+		// 	}),
+		// );
+		// console.log(a);
 	}
 
 	public async downloadTranslations(): Promise<CreateKeyData[]> {
