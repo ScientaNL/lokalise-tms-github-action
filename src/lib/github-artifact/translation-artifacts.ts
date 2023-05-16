@@ -10,15 +10,15 @@ export class TranslationArtifacts {
 	}
 
 	public async uploadTranslations(terms: CreateKeyData[]): Promise<void> {
-		// await this.documentClient.send(
-		// 	new PutCommand({
-		// 		TableName: this.tableName,
-		// 		Item: {
-		// 			primaryKey: "VALUE_1", // For example, 'Season': 2
-		// 			NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
-		// 		},
-		// 	}),
-		// );
+		await this.documentClient.send(
+			new PutCommand({
+				TableName: this.tableName,
+				Item: {
+					primaryKey: 135, // For example, 'Season': 2
+					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
+				},
+			}),
+		);
 
 		const a  = await this.documentClient.send(
 			new GetCommand({
