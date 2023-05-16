@@ -59,7 +59,7 @@ export class CreateDiffApp {
 			console.log(234);
 			await writeTranslationsToPR(newKeys, `➕ New translations:`);
 		} catch (e) {
-			console.log(e);
+			console.error(e);
 		}
 	}
 

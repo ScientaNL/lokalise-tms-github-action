@@ -1,4 +1,4 @@
-import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { CreateKeyData } from "@lokalise/node-api";
 
 export class TranslationArtifacts {
@@ -11,18 +11,21 @@ export class TranslationArtifacts {
 
 	public async uploadTranslations(terms: CreateKeyData[]): Promise<void> {
 		await this.documentClient.send(
-			new UpdateCommand({
+			new PutCommand({
 				TableName: this.tableName,
-				Key: {
-					id: this.prId,
+				Item: {
+					primaryKey: "VALUE_1", // For example, 'Season': 2
+					sortKey: "VALUE_2", // For example,  'Episode': 2 (only required if table has sort key)
+					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
 				},
-				ExpressionAttributeNames: {
-					"#terms": "terms",
-				},
-				UpdateExpression: "set coverage.#terms = :terms",
-				ExpressionAttributeValues: {
-					":terms": terms,
-				},
+
+				// ExpressionAttributeNames: {
+				// 	"#terms": "terms",
+				// },
+				// UpdateExpression: "set coverage.#terms = :terms",
+				// ExpressionAttributeValues: {
+				// 	":terms": terms,
+				// },
 			}),
 		);
 	}

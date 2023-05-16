@@ -56058,7 +56058,7 @@ class CreateDiffApp {
                 yield (0,_lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_2__/* .writeTranslationsToPR */ .r)(newKeys, `➕ New translations:`);
             }
             catch (e) {
-                console.log(e);
+                console.error(e);
             }
         });
     }
@@ -56145,18 +56145,20 @@ class TranslationArtifacts {
     }
     uploadTranslations(terms) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.UpdateCommand({
+            yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.PutCommand({
                 TableName: this.tableName,
-                Key: {
-                    id: this.prId,
+                Item: {
+                    primaryKey: "VALUE_1",
+                    sortKey: "VALUE_2",
+                    NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
                 },
-                ExpressionAttributeNames: {
-                    "#terms": "terms",
-                },
-                UpdateExpression: "set coverage.#terms = :terms",
-                ExpressionAttributeValues: {
-                    ":terms": terms,
-                },
+                // ExpressionAttributeNames: {
+                // 	"#terms": "terms",
+                // },
+                // UpdateExpression: "set coverage.#terms = :terms",
+                // ExpressionAttributeValues: {
+                // 	":terms": terms,
+                // },
             }));
         });
     }
