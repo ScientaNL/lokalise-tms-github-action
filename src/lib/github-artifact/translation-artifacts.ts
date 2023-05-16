@@ -1,42 +1,43 @@
-import { ArtifactClient } from "@actions/artifact";
+import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 import { CreateKeyData } from "@lokalise/node-api";
-import { ensureDir, outputJson, readJson, remove } from "fs-extra";
 
 export class TranslationArtifacts {
 	constructor(
-		private readonly artifactClient: ArtifactClient,
+		private readonly documentClient: DynamoDBDocumentClient,
+		private readonly tableName: string,
 		private readonly prId: number,
-		private readonly storageRoot: string = '/tmp',
 	) {
 	}
 
-	public async uploadTranslations(translations: CreateKeyData[]): Promise<void> {
-		const artifactName = this.getArtifactName();
+	public async uploadTranslations(terms: CreateKeyData[]): Promise<void> {
 
-		const artifactTmpFileName = `${artifactName}.json`;
-		await outputJson(`${this.storageRoot}/${artifactTmpFileName}`, translations);
-
-		await this.artifactClient.uploadArtifact(
-			artifactName,
-			[`${this.storageRoot}/${artifactTmpFileName}`],
-			this.storageRoot,
+		await this.documentClient.send(
+			new UpdateCommand({
+				TableName: this.tableName,
+				Key: {
+					id: this.prId,
+				},
+				ExpressionAttributeNames: {
+					"#terms": "terms",
+				},
+				UpdateExpression: "set coverage.#terms = :terms",
+				ExpressionAttributeValues: {
+					":terms": terms,
+				},
+			}),
 		);
-
-		await remove(`${this.storageRoot}/${artifactTmpFileName}`);
-	}
-
-	private getArtifactName() {
-		return `translations-${this.prId}`;
 	}
 
 	public async downloadTranslations(): Promise<CreateKeyData[]> {
-		const artifactName = this.getArtifactName();
-		const artifactTmpFileName = `${artifactName}.json`;
+		// const artifactName = this.getArtifactName();
+		// const artifactTmpFileName = `${artifactName}.json`;
+		//
+		// await ensureDir(this.storageRoot);
+		//
+		// const artifact = await this.artifactClient.downloadArtifact(artifactName, this.storageRoot, {createArtifactFolder: false});
+		//
+		// return await readJson(`${artifact.downloadPath}/${artifactTmpFileName}`);
 
-		await ensureDir(this.storageRoot);
-
-		const artifact = await this.artifactClient.downloadArtifact(artifactName, this.storageRoot, {createArtifactFolder: false});
-
-		return await readJson(`${artifact.downloadPath}/${artifactTmpFileName}`);
+		return [];
 	}
 }

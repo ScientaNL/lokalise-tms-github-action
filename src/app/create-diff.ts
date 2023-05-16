@@ -8,9 +8,19 @@ import { TMSClient } from "../lib/lokalise-api/tms-client.js";
 import { TermsContainer } from "../lib/terms-container.js";
 import { FileTypesEnum } from "../lib/translation-files/file-types.enum.js";
 import { ReaderFactory } from "../lib/translation-files/reader-factory.js";
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, GetCommand, GetCommandOutput, UpdateCommand } from "@aws-sdk/lib-dynamodb";
 
 export class CreateDiffApp {
-	private readonly artifactClient = create();
+	private readonly dynamoDBClient = DynamoDBDocumentClient.from(
+		new DynamoDBClient({
+			credentials: {
+				accessKeyId: getInput("dynamoDBAccessKey"),
+				secretAccessKey: getInput("dynamoDBSecret"),
+			},
+			region: getInput("AWSRegion"),
+		}),
+	);
 
 	private readonly tmsClient = new TMSClient(
 		getInput("lokaliseApi"),
@@ -18,7 +28,8 @@ export class CreateDiffApp {
 	);
 
 	private readonly translationArtifacts = new TranslationArtifacts(
-		this.artifactClient,
+		this.dynamoDBClient,
+		getInput("dynamoDBTable"),
 		parseInt(getInput('pr_number')),
 	);
 
