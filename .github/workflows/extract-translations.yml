@@ -1,9 +1,9 @@
-name: Lokalise TMS GitHub Actions Demo
+name: Extract translations and create artifact
 on:
   pull_request:
     types: [ opened, reopened, synchronize ]
 jobs:
-  lokalise:
+  extract-translations:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -19,5 +19,8 @@ jobs:
           lokaliseProject: ${{ secrets.LOKALISE_PROJECT }}
           lokaliseSourceLanguageCode: source
           mode: createDiff
+
           token: ${{ secrets.GITHUB_TOKEN }}
           pr_number: ${{ github.event.number }}
+          owner: ScientaNL
+          repo: lokalise-tms-github-action

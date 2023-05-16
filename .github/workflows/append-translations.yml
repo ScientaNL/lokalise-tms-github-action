@@ -1,0 +1,32 @@
+name: Append extracted translations
+on:
+  pull_request:
+    types: [ closed ]
+jobs:
+  append-translations:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: lokalise
+        uses: ./
+        with:
+          terms: ./messages.xlf, ./messages.json
+          destinations: .
+          destinationLocales: nl|en|de|fr
+          lokaliseApi: ${{ secrets.LOKALISE_API }}
+          lokaliseProject: ${{ secrets.LOKALISE_PROJECT }}
+          lokaliseSourceLanguageCode: source
+          mode: appendDiff
+
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pr_number: ${{ github.event.number }}
+          owner: ScientaNL
+          repo: lokalise-tms-github-action
+
+          dynamoDBAccessKey: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          dynamoDBSecret: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          dynamoDBTable: translation-keys
+          AWSRegion: eu-west-3
