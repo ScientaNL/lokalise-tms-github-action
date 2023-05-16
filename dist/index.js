@@ -56146,7 +56146,7 @@ class TranslationArtifacts {
     uploadTranslations(terms) {
         return __awaiter(this, void 0, void 0, function* () {
             yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.PutCommand({
-                TableName: this.tableName,
+                TableName: "dasd",
                 Item: {
                     primaryKey: "VALUE_1",
                     NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'

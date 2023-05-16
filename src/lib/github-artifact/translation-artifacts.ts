@@ -12,7 +12,7 @@ export class TranslationArtifacts {
 	public async uploadTranslations(terms: CreateKeyData[]): Promise<void> {
 		await this.documentClient.send(
 			new PutCommand({
-				TableName: this.tableName,
+				TableName: "dasd",
 				Item: {
 					primaryKey: "VALUE_1", // For example, 'Season': 2
 					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE", //For example 'Title': 'The Beginning'
