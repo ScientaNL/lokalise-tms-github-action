@@ -25087,6 +25087,7 @@ class CreateDiffApp {
                     return;
                 }
                 yield this.translationArtifacts.uploadTranslations(newKeys);
+                console.log(234);
                 yield (0,_lib_github_pr_github_comment_js__WEBPACK_IMPORTED_MODULE_3__/* .writeTranslationsToPR */ .r)(newKeys, `➕ New translations:`);
             }
             catch (e) {

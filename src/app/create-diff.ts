@@ -45,6 +45,7 @@ export class CreateDiffApp {
 			}
 
 			await this.translationArtifacts.uploadTranslations(newKeys);
+			console.log(234);
 			await writeTranslationsToPR(newKeys, `➕ New translations:`);
 		} catch (e) {
 			console.log(e);
