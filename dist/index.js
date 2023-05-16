@@ -56148,17 +56148,17 @@ class TranslationArtifacts {
             yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.PutCommand({
                 TableName: this.tableName,
                 Item: {
-                    "pr-id": 135,
-                    NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE",
+                    "pr-id": this.prId,
+                    terms: terms,
                 },
             }));
             const a = yield this.documentClient.send(new _aws_sdk_lib_dynamodb__WEBPACK_IMPORTED_MODULE_0__.GetCommand({
                 TableName: this.tableName,
                 Key: {
-                    "pr-id": 135
+                    "pr-id": this.prId,
                 }
             }));
-            console.log(a);
+            console.log(a.Item);
         });
     }
     downloadTranslations() {

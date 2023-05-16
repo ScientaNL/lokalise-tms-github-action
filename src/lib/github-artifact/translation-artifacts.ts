@@ -14,21 +14,21 @@ export class TranslationArtifacts {
 			new PutCommand({
 				TableName: this.tableName,
 				Item: {
-					"pr-id": 135,
-					NEW_ATTRIBUTE_1: "NEW_ATTRIBUTE_1_VALUE",
+					"pr-id": this.prId,
+					terms: terms,
 				},
 			}),
 		);
 
-		const a  = await this.documentClient.send(
+		const a = await this.documentClient.send(
 			new GetCommand({
 				TableName: this.tableName,
 				Key: {
-					"pr-id": 135
+					"pr-id": this.prId,
 				}
 			}),
 		);
-		console.log(a);
+		console.log(a.Item);
 	}
 
 	public async downloadTranslations(): Promise<CreateKeyData[]> {
