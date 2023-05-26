@@ -25,6 +25,8 @@ export class JsonReader implements TermsReader {
 				originalId: inputKey.term,
 				term: inputKey.term,
 				srcLang: contents.srcLang,
+				description: null,
+				meaning: null,
 			});
 		}
 
