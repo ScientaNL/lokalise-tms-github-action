@@ -27,7 +27,7 @@
 		"@actions/github": "^5.1.1",
 		"@aws-sdk/client-dynamodb": "^3.332.0",
 		"@aws-sdk/lib-dynamodb": "^3.332.0",
-		"@lokalise/node-api": "^9.2.0",
+		"@lokalise/node-api": "^9.8.1",
 		"entities": "^4.5.0",
 		"fast-xml-parser": "^4.0.12",
 		"joi": "^17.9.2",
