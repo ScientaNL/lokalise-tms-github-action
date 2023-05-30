@@ -12,6 +12,9 @@ inputs:
     description: 'actions rc (configuration) file'
     required: true
 
+  token:
+    description: 'Github Actions token'
+    required: true
   repo:
     description: 'The repository on which to execute'
     required: true
