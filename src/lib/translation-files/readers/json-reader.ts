@@ -7,6 +7,7 @@ interface JsonInput {
 	units: {
 		term: string,
 		location: string,
+		meaning?: string | null,
 	}[];
 }
 
