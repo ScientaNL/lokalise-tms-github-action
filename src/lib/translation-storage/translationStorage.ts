@@ -2,7 +2,13 @@ import { DeleteCommand, DynamoDBDocumentClient, GetCommand, PutCommand } from "@
 import { SnapshotData } from "../snapshot.js";
 import { TranslationKey } from "../translation-key.js";
 
-export class Storage {
+export interface Storage {
+	uploadTranslations(keys: TranslationKey[]): Promise<void> ;
+	downloadTranslations(): Promise<TranslationKey<SnapshotData>[]> ;
+	removeTranslations(): Promise<void> ;
+}
+
+export class _Storage {
 	constructor(
 		private readonly documentClient: DynamoDBDocumentClient,
 		private readonly tableName: string,
@@ -35,7 +41,7 @@ export class Storage {
 		return response.Item?.terms ?? [];
 	}
 
-	public async removeTranslations() {
+	public async removeTranslations(): Promise<void> {
 		await this.documentClient.send(
 			new DeleteCommand({
 				TableName: this.tableName,
