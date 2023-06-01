@@ -7,7 +7,7 @@ import { TMSClient } from '../lib/lokalise-api/tms-client.js';
 import { SnapshotData } from '../lib/snapshot.js';
 import { ReaderFactory } from '../lib/translation-files/reader-factory.js';
 import { TranslationKey } from '../lib/translation-key.js';
-import { Storage } from '../lib/translation-storage/storage.js';
+import { TranslationStorage } from '../lib/translation-storage/translationStorage.js';
 
 export class ExtractTranslationsAndStoreCommand implements Command {
 	private readonly summaryText = `➕ New translations:`;
@@ -15,7 +15,7 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 	constructor(
 		private readonly configuration: Configuration,
 		private readonly tmsClient: TMSClient,
-		private readonly translationStorage: Storage,
+		private readonly translationStorage: TranslationStorage,
 		private readonly githubComments: GithubComments,
 	) {
 	}
@@ -35,13 +35,13 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 
 		if (newKeys.length) {
 			info(`${newKeys.length} New keys found. Store them in the storage.`);
-			await this.translationStorage.uploadTranslations(newKeys);
+			await this.translationStorage.saveTranslations(newKeys);
 
 			info(`Write comment with new translations to PR`);
 			await this.githubComments.writeTranslationsToPR(newKeys, this.summaryText);
 		} else {
 			info(`No new keys found. Store result into storage`);
-			await this.translationStorage.uploadTranslations([]);
+			await this.translationStorage.saveTranslations([]);
 
 			info(`Remove comment from PR (if one)`);
 			await this.githubComments.removeTranslationsComment(this.summaryText);
