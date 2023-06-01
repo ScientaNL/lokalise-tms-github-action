@@ -15,6 +15,7 @@ jobs:
         with:
           actions-rc: ./test-workflows/.translate-actionrc.yml
           command: addSnapshot
+          mockGithub: true
 
           lokaliseApi: ${{ secrets.LOKALISE_API }}
           lokaliseProject: ${{ secrets.LOKALISE_PROJECT }}
@@ -25,7 +26,4 @@ jobs:
           owner: ScientaNL
           repo: lokalise-tms-github-action
 
-          dynamoDBAccessKey: ${{ secrets.AWS_DYNAMODB_ACCESS_KEY_ID }}
-          dynamoDBSecret: ${{ secrets.AWS_DYNAMODB_SECRET_ACCESS_KEY }}
-          dynamoDBTable: translation-keys
-          AWSRegion: eu-west-3
+          mockStoragePath: ./test-workflows/tmp

@@ -1,20 +1,23 @@
 import { getInput, setFailed } from '@actions/core';
 import { getOctokit } from '@actions/github';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient } from '@aws-sdk/lib-dynamodb';
 import { AddTranslationsSnapshotToTmsCommand } from './commands/add-translations-snapshot-to-tms-command.js';
 import { CreateTranslationFilesCommand } from './commands/create-translation-files-command.js';
 import { ExtractTranslationsAndStoreCommand } from './commands/extract-translations-and-store-command.js';
 import { Command } from './lib/command.js';
 import { loadConfig } from './lib/configuration/config-parser.js';
 import { Configuration } from './lib/configuration/configuration.js';
+import { GithubCommentsUsingMock } from "./lib/github-pr/github-comment-using-blackhole.js";
+import { GithubCommentsUsingGithub } from "./lib/github-pr/github-comment-using-github.js";
 import { GithubComments } from './lib/github-pr/github-comment.js';
 import { TMSClient } from './lib/lokalise-api/tms-client.js';
-import { Storage } from './lib/translation-storage/storage.js';
+import { TranslationStorageUsingFilesystem } from "./lib/translation-storage/translation-storage-using-filesystem.js";
+import { TranslationStorageUsingGithubArtifacts } from "./lib/translation-storage/translation-storage-using-github-artifacts.js";
+import { TranslationStorage } from './lib/translation-storage/translationStorage.js';
 
 (async (): Promise<void> => {
 	try {
 		const config = await loadConfig(getInput('actions-rc'));
+		const useMockServices = !!getInput('mockGithub');
 
 		let app: Command;
 		switch (getInput('command')) {
@@ -22,15 +25,15 @@ import { Storage } from './lib/translation-storage/storage.js';
 				app = new ExtractTranslationsAndStoreCommand(
 					config,
 					getLokaliseTmsClient(config.lokalise),
-					getTranslationStorage(),
-					getGithubComments(),
+					getTranslationStorage(useMockServices),
+					getGithubComments(useMockServices),
 				);
 				break;
 			case 'addSnapshot':
 				app = new AddTranslationsSnapshotToTmsCommand(
 					config,
 					getLokaliseTmsClient(config.lokalise),
-					getTranslationStorage(),
+					getTranslationStorage(useMockServices),
 				);
 				break;
 			case 'createTranslationFiles':
@@ -51,23 +54,6 @@ import { Storage } from './lib/translation-storage/storage.js';
 	}
 })();
 
-function getDynamoDBClient(): DynamoDBDocumentClient {
-	return DynamoDBDocumentClient.from(
-		new DynamoDBClient({
-			credentials: {
-				accessKeyId: getInput('dynamoDBAccessKey'),
-				secretAccessKey: getInput('dynamoDBSecret'),
-			},
-			region: getInput('AWSRegion'),
-		}),
-		{
-			marshallOptions: {
-				removeUndefinedValues: true,
-			},
-		},
-	);
-}
-
 function getLokaliseTmsClient(config: Configuration['lokalise']): TMSClient {
 	return new TMSClient(
 		getInput('lokaliseApi'),
@@ -76,19 +62,27 @@ function getLokaliseTmsClient(config: Configuration['lokalise']): TMSClient {
 	);
 }
 
-function getTranslationStorage(): Storage {
-	return new Storage(
-		getDynamoDBClient(),
-		getInput('dynamoDBTable'),
-		parseInt(getInput('pr_number')),
-	);
+function getTranslationStorage(useMock: boolean = false): TranslationStorage {
+	return !useMock
+		? new TranslationStorageUsingGithubArtifacts(
+			getOctokit(getInput('token')),
+			getInput('owner'),
+			getInput('repo'),
+			parseInt(getInput('pr_number')),
+		)
+		: new TranslationStorageUsingFilesystem(
+			getInput('mockStoragePath'),
+			parseInt(getInput('pr_number')),
+		);
 }
 
-function getGithubComments(): GithubComments {
-	return new GithubComments(
-		getOctokit(getInput('token')),
-		getInput('owner'),
-		getInput('repo'),
-		parseInt(getInput('pr_number')),
-	);
+function getGithubComments(useMock: boolean = false): GithubComments {
+	return !useMock
+		? new GithubCommentsUsingGithub(
+			getOctokit(getInput('token')),
+			getInput('owner'),
+			getInput('repo'),
+			parseInt(getInput('pr_number')),
+		)
+		: new GithubCommentsUsingMock();
 }

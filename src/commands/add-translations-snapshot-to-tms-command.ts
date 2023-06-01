@@ -4,18 +4,18 @@ import { Configuration } from '../lib/configuration/configuration.js';
 import { TMSClient } from '../lib/lokalise-api/tms-client.js';
 import { SnapshotData } from '../lib/snapshot.js';
 import { TranslationKey } from '../lib/translation-key.js';
-import { Storage } from '../lib/translation-storage/storage.js';
+import { TranslationStorage } from '../lib/translation-storage/translationStorage.js';
 
 export class AddTranslationsSnapshotToTmsCommand implements Command {
 	constructor(
 		private readonly configuration: Configuration,
 		private readonly tmsClient: TMSClient,
-		private readonly translationStorage: Storage,
+		private readonly translationStorage: TranslationStorage,
 	) {
 	}
 
 	public async run(): Promise<void> {
-		const translations = await this.translationStorage.downloadTranslations();
+		const translations = await this.translationStorage.loadTranslations();
 		const uniqueTranslations = this.unique(translations);
 
 		info(

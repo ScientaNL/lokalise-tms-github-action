@@ -25,14 +25,16 @@
 	"dependencies": {
 		"@actions/core": "^1.10.0",
 		"@actions/github": "^5.1.1",
-		"@aws-sdk/client-dynamodb": "^3.332.0",
-		"@aws-sdk/lib-dynamodb": "^3.332.0",
 		"@lokalise/node-api": "^9.8.1",
 		"entities": "^4.5.0",
 		"fast-xml-parser": "^4.0.12",
 		"joi": "^17.9.2",
 		"xml-reader": "^2.4.3",
-		"yaml": "^2.2.2"
+		"yaml": "^2.2.2",
+		"@actions/artifact": "^1.1.1",
+		"jszip": "^3.10.1",
+		"rimraf": "^5.0.1",
+		"tempy": "^3.0.0"
 	},
 	"devDependencies": {
 		"@types/node": "^16.18.3",

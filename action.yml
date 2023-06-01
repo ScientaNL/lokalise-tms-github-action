@@ -11,6 +11,9 @@ inputs:
   actions-rc:
     description: 'actions rc (configuration) file'
     required: true
+  mockGithub:
+    description: 'Mock Github services'
+    required: false
 
   token:
     description: 'Github Actions token'
@@ -32,15 +35,6 @@ inputs:
     description: 'Lokalise API project'
     required: true
 
-  dynamoDBAccessKey:
-    description: 'AWS DynamoDB access key'
-    required: true
-  dynamoDBSecret:
-    description: 'AWS DynamoDB secret'
-    required: true
-  dynamoDBTable:
-    description: 'AWS DynamoDB table name'
-    required: true
-  AWSRegion:
-    description: 'AWS region'
-    required: true
+  mockStoragePath:
+    description: 'Mock Github storage path'
+    required: false

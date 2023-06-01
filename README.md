@@ -5,7 +5,7 @@ Scienta's take on translation management, using [Lokalise](https://lokalise.com/
 This project contains a GitHub Action which can be used in various actions to create a Translation Management flow.
 
 At Scienta, we use the following flow:
-- On `PR create` a GitHub action checks if the PR (HEAD ref) contains new translations, compared to the TMS (Lokalise). The new translations are stored in a DynamoDB storage and a comment is added to the PR.
+- On `PR create` a GitHub action checks if the PR (HEAD ref) contains new translations, compared to the TMS (Lokalise). The new translations are stored in a Github Actions Artifact and a comment is added to the PR.
 - On `PR merge` the stored translations are added to the TMS and can be translated by translators.
 - On `release` all keys are retrieved from the TMS and translation files are generated
 
