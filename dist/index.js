@@ -62224,6 +62224,15 @@ ${keys.map(({ term }, index) => `<tr><td>${index + 1}</td><td><pre><code>${term}
 </details>
 	`;
     }
+    static createSummary(keys, heading) {
+        return `
+<details>
+<summary>${heading}</summary>
+
+Translations overview is too big. ${keys.length} translations found.
+</details>
+	`;
+    }
 }
 
 ;// CONCATENATED MODULE: ./src/lib/github-pr/github-comment-using-blackhole.ts
@@ -62289,7 +62298,10 @@ class GithubCommentsUsingGithub {
     }
     writeTranslationsToPR(keys, summaryText) {
         return github_comment_using_github_awaiter(this, void 0, void 0, function* () {
-            const commentText = TranslationsMarkdownFormatter.createMessage(keys, summaryText);
+            let commentText = TranslationsMarkdownFormatter.createMessage(keys, summaryText);
+            if (commentText.length >= 65536) {
+                commentText = TranslationsMarkdownFormatter.createSummary(keys, summaryText);
+            }
             const prComments = yield this.octokit.rest.issues.listComments({
                 owner: this.owner,
                 repo: this.repository,
