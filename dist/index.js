@@ -50582,7 +50582,7 @@ exports.implementation = class URLImpl {
 
 
 const conversions = __nccwpck_require__(4886);
-const utils = __nccwpck_require__(1615);
+const utils = __nccwpck_require__(3185);
 const Impl = __nccwpck_require__(7537);
 
 const impl = utils.implSymbol;
@@ -52101,7 +52101,7 @@ module.exports.parseURL = function (input, options) {
 
 /***/ }),
 
-/***/ 1615:
+/***/ 3185:
 /***/ ((module) => {
 
 
@@ -62204,6 +62204,28 @@ function loadConfig(rcPath) {
     });
 }
 
+;// CONCATENATED MODULE: ./src/lib/github-pr/translations-markdown-formatter.ts
+/**
+ * @see https://github.github.com/gfm/#html-blocks
+ */
+class TranslationsMarkdownFormatter {
+    static createMessage(keys, heading) {
+        return `
+<details>
+<summary>${heading}</summary>
+
+<table>
+<tr>
+<th>#</th>
+<th>Term</th>
+</tr>
+${keys.map(({ term }, index) => `<tr><td>${index + 1}</td><td><pre><code>${term}</code></pre></td></tr>\n`)}
+</table>
+</details>
+	`;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/lib/github-pr/github-comment-using-blackhole.ts
 var github_comment_using_blackhole_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -62214,15 +62236,17 @@ var github_comment_using_blackhole_awaiter = (undefined && undefined.__awaiter) 
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
 class GithubCommentsUsingMock {
     removeTranslationsComment(summaryText) {
         return github_comment_using_blackhole_awaiter(this, void 0, void 0, function* () {
-            console.log("Move remove PR comment");
+            console.log("Remove PR comment");
         });
     }
     writeTranslationsToPR(keys, summaryText) {
         return github_comment_using_blackhole_awaiter(this, void 0, void 0, function* () {
             console.log("Mock write translations to PR comments");
+            console.log(TranslationsMarkdownFormatter.createMessage(keys, summaryText));
         });
     }
 }
