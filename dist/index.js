@@ -62261,6 +62261,7 @@ var github_comment_using_github_awaiter = (undefined && undefined.__awaiter) || 
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+
 class GithubCommentsUsingGithub {
     constructor(octokit, owner, repository, prId) {
         this.octokit = octokit;
@@ -62288,7 +62289,7 @@ class GithubCommentsUsingGithub {
     }
     writeTranslationsToPR(keys, summaryText) {
         return github_comment_using_github_awaiter(this, void 0, void 0, function* () {
-            const commentText = this.createPRCommentBody(keys, summaryText);
+            const commentText = TranslationsMarkdownFormatter.createMessage(keys, summaryText);
             const prComments = yield this.octokit.rest.issues.listComments({
                 owner: this.owner,
                 repo: this.repository,
