@@ -1,6 +1,7 @@
 import { GitHub } from "@actions/github/lib/utils.js";
 import { TranslationKey } from "../translation-key.js";
 import { GithubComments } from "./github-comment.js";
+import { TranslationsMarkdownFormatter } from "./translations-markdown-formatter.js";
 
 interface Comment {
 	id: number;
@@ -45,7 +46,7 @@ export class GithubCommentsUsingGithub implements GithubComments {
 		keys: TranslationKey[],
 		summaryText: string,
 	): Promise<void> {
-		const commentText = this.createPRCommentBody(keys, summaryText);
+		const commentText = TranslationsMarkdownFormatter.createMessage(keys, summaryText);
 
 		const prComments: { data: Comment[] } = await this.octokit.rest.issues.listComments({
 			owner: this.owner,
