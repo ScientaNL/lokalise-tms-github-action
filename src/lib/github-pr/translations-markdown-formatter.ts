@@ -22,4 +22,14 @@ ${keys.map(({term}, index) => `<tr><td>${index + 1}</td><td><pre><code>${term}</
 </details>
 	`;
 	}
+
+	public static createSummary(keys: TranslationKey[], heading: string): string {
+		return `
+<details>
+<summary>${heading}</summary>
+
+Translations overview is too big. ${keys.length} translations found.
+</details>
+	`;
+	}
 }

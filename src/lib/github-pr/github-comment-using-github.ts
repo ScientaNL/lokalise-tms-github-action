@@ -46,7 +46,11 @@ export class GithubCommentsUsingGithub implements GithubComments {
 		keys: TranslationKey[],
 		summaryText: string,
 	): Promise<void> {
-		const commentText = TranslationsMarkdownFormatter.createMessage(keys, summaryText);
+		let commentText = TranslationsMarkdownFormatter.createMessage(keys, summaryText);
+
+		if (commentText.length >= 65536) {
+			commentText = TranslationsMarkdownFormatter.createSummary(keys, summaryText);
+		}
 
 		const prComments: { data: Comment[] } = await this.octokit.rest.issues.listComments({
 			owner: this.owner,
