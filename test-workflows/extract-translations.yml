@@ -24,4 +24,22 @@ jobs:
           owner: ScientaNL
           repo: lokalise-tms-github-action
 
+          prCommentTemplate: |+
+            <details>
+            <summary>➕ New translations: <%= keys.length === 1 ? '1 translation found' : `${keys.length} translations found` %></summary>
+
+            <%_ keys.forEach((key) => {  _%>
+            ```
+            <%= key.term %>
+            ```
+            <%_ }); _%>
+            </details>
+
+          prCommentSummaryTemplate: |+
+            <details>
+            <summary>➕ New translations: <%= keys.length === 1 ? '1 translation found' : `${keys.length} translations found` %></summary>
+
+            _There are too many translations to show._
+            <%_ }); _%>
+            </details>
           mockStoragePath: ./test-workflows/tmp

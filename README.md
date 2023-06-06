@@ -12,6 +12,10 @@ At Scienta, we use the following flow:
 ## Usage
 Checkout the various test-workflows in the `./test-workflows` directory. This Action can be used as a GitHub Action step. You have to specify the command you want to execute.
 
+### PR comment template
+The template engine [ejs](https://www.npmjs.com/package/ejs) is used to render the PR comments. the keys variable is exposed, wich is `TranslationKey[]`. Check out the example.
+
+
 ## Configuration
 Create a valid [configuration.ts](src%2Flib%2Fconfiguration%2Fconfiguration.ts) to have this GitHub Action work properly.
 

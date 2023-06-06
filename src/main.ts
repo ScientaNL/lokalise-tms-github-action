@@ -9,6 +9,7 @@ import { Configuration } from './lib/configuration/configuration.js';
 import { GithubCommentsUsingMock } from "./lib/github-pr/github-comment-using-blackhole.js";
 import { GithubCommentsUsingGithub } from "./lib/github-pr/github-comment-using-github.js";
 import { GithubComments } from './lib/github-pr/github-comment.js';
+import { TranslationsSummaryTemplate } from "./lib/github-pr/translations-summary-template.js";
 import { TMSClient } from './lib/lokalise-api/tms-client.js';
 import { TranslationStorageUsingFilesystem } from "./lib/translation-storage/translation-storage-using-filesystem.js";
 import { TranslationStorageUsingGithubArtifacts } from "./lib/translation-storage/translation-storage-using-github-artifacts.js";
@@ -77,12 +78,18 @@ function getTranslationStorage(useMock: boolean = false): TranslationStorage {
 }
 
 function getGithubComments(useMock: boolean = false): GithubComments {
+	const templateEngine = new TranslationsSummaryTemplate(
+		getInput('prCommentTemplate', {required: true}),
+		getInput('prCommentSummaryTemplate', {required: true}),
+	);
+
 	return !useMock
 		? new GithubCommentsUsingGithub(
-			getOctokit(getInput('token')),
-			getInput('owner'),
-			getInput('repo'),
-			parseInt(getInput('pr_number')),
+			getOctokit(getInput('token', {required: true})),
+			getInput('owner', {required: true}),
+			getInput('repo', {required: true}),
+			parseInt(getInput('pr_number', {required: true})),
+			templateEngine,
 		)
-		: new GithubCommentsUsingMock();
+		: new GithubCommentsUsingMock(templateEngine);
 }

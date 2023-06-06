@@ -1,18 +1,20 @@
 import { TranslationKey } from "../translation-key.js";
 import { GithubComments } from "./github-comment.js";
-import { TranslationsMarkdownFormatter } from "./translations-markdown-formatter.js";
+import { TranslationsSummaryTemplate } from "./translations-summary-template.js";
 
 export class GithubCommentsUsingMock implements GithubComments {
-	public async removeTranslationsComment(summaryText: string): Promise<void> {
+	constructor(
+		private readonly templateEngine: TranslationsSummaryTemplate,
+	) {
+	}
+
+	public async removeTranslationsComment(): Promise<void> {
 		console.log("Remove PR comment");
 	}
 
-	public async writeTranslationsToPR(
-		keys: TranslationKey[],
-		summaryText: string,
-	): Promise<void> {
+	public async writeTranslationsToPR(keys: TranslationKey[]): Promise<void> {
 		console.log("Mock write translations to PR comments");
-		console.log(TranslationsMarkdownFormatter.createMessage(keys, summaryText));
+		console.log(this.templateEngine.createMessage(keys));
 	}
 }
 
