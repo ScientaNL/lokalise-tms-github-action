@@ -10,8 +10,6 @@ import { TranslationKey } from '../lib/translation-key.js';
 import { TranslationStorage } from '../lib/translation-storage/translationStorage.js';
 
 export class ExtractTranslationsAndStoreCommand implements Command {
-	private readonly summaryText = `➕ New translations:`;
-
 	constructor(
 		private readonly configuration: Configuration,
 		private readonly tmsClient: TMSClient,
@@ -38,13 +36,13 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 			await this.translationStorage.saveTranslations(newKeys);
 
 			info(`Write comment with new translations to PR`);
-			await this.githubComments.writeTranslationsToPR(newKeys, this.summaryText);
+			await this.githubComments.writeTranslationsToPR(newKeys);
 		} else {
 			info(`No new keys found. Store result into storage`);
 			await this.translationStorage.saveTranslations([]);
 
 			info(`Remove comment from PR (if one)`);
-			await this.githubComments.removeTranslationsComment(this.summaryText);
+			await this.githubComments.removeTranslationsComment();
 		}
 	}
 

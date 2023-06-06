@@ -35,6 +35,13 @@ inputs:
     description: 'Lokalise API project'
     required: true
 
+  prCommentTemplate:
+    description: 'Pull request comment template'
+    required: false # Only required in the extract flow
+  prCommentSummaryTemplate:
+    description: 'Pull request comment summary template (if the comment body is too big)'
+    required: false # Only required in the extract flow
+
   mockStoragePath:
     description: 'Mock Github storage path'
     required: false
