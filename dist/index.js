@@ -63137,7 +63137,7 @@ class CreateTranslationFilesCommand {
             const tmsKeys = yield this.tmsClient.getProjectKeys(true);
             (0,core.info)(`Keys get complete (${tmsKeys.length})`);
             for (const output of this.configuration.outputs) {
-                (0,core.info)(`Generate translation file for ${output.type}:${output.targetLocale} - ${output.destination}`);
+                (0,core.info)(`Generate translation file for ${output.type}:${output.targetLocale.output} - ${output.destination}`);
                 yield this.generateOutput(tmsKeys.filter(({ tags }) => tags.includes(output.tag)), output);
             }
         });

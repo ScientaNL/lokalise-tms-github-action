@@ -19,7 +19,7 @@ export class CreateTranslationFilesCommand implements Command {
 
 		for (const output of this.configuration.outputs) {
 			info(
-				`Generate translation file for ${output.type}:${output.targetLocale} - ${output.destination}`,
+				`Generate translation file for ${output.type}:${output.targetLocale.output} - ${output.destination}`,
 			);
 
 			await this.generateOutput(
