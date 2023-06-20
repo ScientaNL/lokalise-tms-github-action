@@ -30,7 +30,7 @@ jobs:
 
             <%_ keys.forEach((key) => {  _%>
             ```
-            <%= key.term %>
+            <%- key.term %>
             ```
             <%_ }); _%>
             </details>
