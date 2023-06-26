@@ -1,5 +1,5 @@
 import { render } from 'ejs';
-import { TranslationKey } from "../translation-key.js";
+import { ExtractedKey } from "../translation-key.js";
 
 /**
  * @see https://github.github.com/gfm/#html-blocks
@@ -12,7 +12,7 @@ export class TranslationsSummaryTemplate {
 	) {
 	}
 
-	public createMessage(keys: TranslationKey[]): string {
+	public createMessage(keys: ExtractedKey[]): string {
 		return render(
 			this.template,
 			{
@@ -21,7 +21,7 @@ export class TranslationsSummaryTemplate {
 		);
 	}
 
-	public createSummary(keys: TranslationKey[]): string {
+	public createSummary(keys: ExtractedKey[]): string {
 		return render(
 			this.summaryTemplate,
 			{

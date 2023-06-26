@@ -6,8 +6,8 @@ import { GithubComments } from '../lib/github-pr/github-comment.js';
 import { TMSClient } from '../lib/lokalise-api/tms-client.js';
 import { SnapshotData } from '../lib/snapshot.js';
 import { ReaderFactory } from '../lib/translation-files/reader-factory.js';
-import { TranslationKey } from '../lib/translation-key.js';
-import { TranslationStorage } from '../lib/translation-storage/translationStorage.js';
+import { ExtractedKey } from '../lib/translation-key.js';
+import { TranslationStorage } from '../lib/translation-storage/translation-storage.js';
 
 export class ExtractTranslationsAndStoreCommand implements Command {
 	constructor(
@@ -23,13 +23,10 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 		const inputKeys = await this.parseTermsFiles();
 
 		info(`Fetch keys currently stored in the TMS`);
-		const tmsKeys = await this.tmsClient.getProjectKeys();
+		const tmsKeys = await this.tmsClient.getKeys();
 		info(`Keys fetched (${tmsKeys.length})`);
 
-		const {newKeys} = this.tmsClient.diffInputKeysWithTMSKeys(
-			inputKeys,
-			tmsKeys,
-		);
+		const {newKeys} = this.tmsClient.diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys);
 
 		if (newKeys.length) {
 			info(`${newKeys.length} New keys found. Store them in the storage.`);
@@ -46,8 +43,8 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 		}
 	}
 
-	private async parseTermsFiles(): Promise<TranslationKey<SnapshotData>[]> {
-		let keys: TranslationKey<SnapshotData>[] = [];
+	private async parseTermsFiles(): Promise<ExtractedKey<SnapshotData>[]> {
+		let keys: ExtractedKey<SnapshotData>[] = [];
 		for (const source of this.configuration.terms) {
 			const reader = await ReaderFactory.factory(source.type);
 			const input = await readFile(source.terms, 'utf-8');

@@ -3,8 +3,8 @@ import { Command } from '../lib/command.js';
 import { Configuration } from '../lib/configuration/configuration.js';
 import { TMSClient } from '../lib/lokalise-api/tms-client.js';
 import { SnapshotData } from '../lib/snapshot.js';
-import { TranslationKey } from '../lib/translation-key.js';
-import { TranslationStorage } from '../lib/translation-storage/translationStorage.js';
+import { ExtractedKey } from '../lib/translation-key.js';
+import { TranslationStorage } from '../lib/translation-storage/translation-storage.js';
 
 export class AddTranslationsSnapshotToTmsCommand implements Command {
 	constructor(
@@ -28,7 +28,7 @@ export class AddTranslationsSnapshotToTmsCommand implements Command {
 			return;
 		}
 
-		let results = await this.tmsClient.addProjectKeys(uniqueTranslations);
+		let results = await this.tmsClient.addKeys(uniqueTranslations);
 
 		results = {
 			...results,
@@ -49,9 +49,9 @@ export class AddTranslationsSnapshotToTmsCommand implements Command {
 	}
 
 	private unique(
-		translations: TranslationKey<SnapshotData>[],
-	): TranslationKey<SnapshotData>[] {
-		const translationMap = new Map<string, TranslationKey<SnapshotData>>();
+		translations: ExtractedKey<SnapshotData>[],
+	): ExtractedKey<SnapshotData>[] {
+		const translationMap = new Map<string, ExtractedKey<SnapshotData>>();
 		for (const translation of translations) {
 			translationMap.set(translation.keyId, translation);
 		}

@@ -2,8 +2,8 @@ import { info } from "@actions/core";
 import { readFile, unlink, writeFile } from "fs/promises";
 import { loadAsync } from 'jszip';
 import { SnapshotData } from "../snapshot.js";
-import { TranslationKey } from "../translation-key.js";
-import { TranslationStorage } from "./translationStorage.js";
+import { ExtractedKey } from "../translation-key.js";
+import { TranslationStorage } from "./translation-storage.js";
 
 type Artifact = { updated_at: string, id: number };
 
@@ -19,17 +19,17 @@ export class TranslationStorageUsingFilesystem implements TranslationStorage {
 		this.artifactPath = `${path}/${this.artifactName}`;
 	}
 
-	public async loadTranslations(): Promise<TranslationKey<SnapshotData>[]> {
+	public async loadTranslations(): Promise<ExtractedKey<SnapshotData>[]> {
 		return JSON.parse(
 			await readFile(this.artifactPath, 'utf-8'),
-		) as TranslationKey<SnapshotData>[];
+		) as ExtractedKey<SnapshotData>[];
 	}
 
 	public async removeTranslations(): Promise<void> {
 		await unlink(this.artifactPath);
 	}
 
-	public async saveTranslations(keys: TranslationKey[]): Promise<void> {
+	public async saveTranslations(keys: ExtractedKey[]): Promise<void> {
 		await writeFile(this.artifactPath, JSON.stringify(keys));
 		info(`Write translations to ${this.artifactPath}`);
 	}

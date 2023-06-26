@@ -5,7 +5,9 @@ import { TermsWriter } from "./writers/terms-writer.js";
 import { Xliff2Writer } from "./writers/xliff2-writer.js";
 
 export class WriterFactory {
-	public static factory(configuration: OutputConfiguration): TermsWriter {
+	public static factory(
+		configuration: OutputConfiguration,
+	): TermsWriter {
 		switch (configuration.type) {
 			case FileTypesEnum.XLIFF2:
 				return new Xliff2Writer(configuration);

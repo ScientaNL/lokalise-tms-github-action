@@ -1,17 +1,24 @@
-import { info } from "@actions/core";
 import { BulkResult, CreateKeyData, Key, LokaliseApi, PaginatedResult } from "@lokalise/node-api";
+import { EventEmitter } from "node:events";
 import { Configuration } from "../configuration/configuration.js";
 import { SnapshotData } from "../snapshot.js";
-import { TranslationKey } from "../translation-key.js";
+import { ExtractedKey, TMSKey, TMSKeyWithTranslations } from "../translation-key.js";
 
 interface InputKeysTMSKeysDiff {
-	newKeys: TranslationKey[];
-	obsoleteKeys: Key[];
+	newKeys: ExtractedKey[];
+	obsoleteKeys: TMSKey[];
+}
+
+export enum TMSEvents {
+	warn = 'warn',
+	info = 'info',
 }
 
 export class TMSClient {
 	private readonly api: LokaliseApi;
 	private readonly limit: number = 500;
+
+	public readonly events: EventEmitter = new EventEmitter();
 
 	constructor(
 		apiKey: string,
@@ -23,8 +30,45 @@ export class TMSClient {
 		});
 	}
 
-	public async getProjectKeys(
-		includeTranslations: boolean = false,
+	public async getKeys(): Promise<TMSKey[]> {
+		const TMSKeys: TMSKey[] = [];
+		for (const lokaliseKey of await this.getLokaliseKeys(false)) {
+			try {
+				TMSKeys.push(this.createTMSKeyFromLokaliseKey(lokaliseKey));
+			} catch (e) {
+				this.events.emit(
+					TMSEvents.warn,
+					`Could not create a TMSKey for ${JSON.stringify(lokaliseKey.key_name)} - skipping the key. ${e}`,
+				);
+			}
+		}
+
+		return TMSKeys;
+	}
+
+	public async getKeysWithTranslations(): Promise<TMSKeyWithTranslations[]> {
+		const TMSKeys: TMSKeyWithTranslations[] = [];
+		for (const lokaliseKey of await this.getLokaliseKeys(true)) {
+			try {
+				TMSKeys.push({
+					...this.createTMSKeyFromLokaliseKey(lokaliseKey),
+					translations: lokaliseKey.translations.map((translation) => ({
+						language: translation.language_iso,
+						translation: translation.translation,
+					})),
+				});
+			} catch (e) {
+				this.events.emit(
+					TMSEvents.warn,
+					`Could not create a TMSKey for ${JSON.stringify(lokaliseKey.key_name)} - skipping the key. ${e}`,
+				);
+			}
+		}
+		return TMSKeys;
+	}
+
+	private async getLokaliseKeys(
+		includeTranslations: boolean,
 	): Promise<Key[]> {
 		let keys: Key[] = [];
 		let cursor: PaginatedResult<Key> | undefined = undefined;
@@ -42,8 +86,8 @@ export class TMSClient {
 		return keys;
 	}
 
-	public async addProjectKeys(keys: TranslationKey<SnapshotData>[]): Promise<BulkResult<Key>> {
-		const tmsKeys: CreateKeyData[] = keys.map((key) => this.createTMSCreateKeyDataOfTranslation(key));
+	public async addKeys(keys: ExtractedKey<SnapshotData>[]): Promise<BulkResult<Key>> {
+		const tmsKeys: CreateKeyData[] = keys.map((key) => this.createLokaliseCreateKeyDataOfTranslation(key));
 
 		const aggregatedBulkResult: BulkResult<Key> = {items: [], errors: []};
 		if (!tmsKeys.length) {
@@ -54,7 +98,7 @@ export class TMSClient {
 		do {
 			const slice = tmsKeys.splice(0, this.limit);
 
-			info(`Create keys: ${index}-${index + slice.length} of ${keys.length}`);
+			this.events.emit(TMSEvents.info, `Create keys: ${index}-${index + slice.length} of ${keys.length}`);
 
 			const bulkResult = await this.api.keys().create(
 				{
@@ -73,11 +117,15 @@ export class TMSClient {
 		return aggregatedBulkResult;
 	}
 
-	public diffInputKeysWithTMSKeys(
-		inputKeys: TranslationKey[],
-		tmsKeys: Key[],
+	public diffExtractedKeysWithTMSKeys(
+		inputKeys: ExtractedKey[],
+		tmsKeys: TMSKey[],
 	): InputKeysTMSKeysDiff {
-		const tmsKeysMap = this.createTMSKeyMap(tmsKeys);
+		const tmsKeysMap = new Map<string, TMSKey>();
+
+		for (const key of tmsKeys) {
+			tmsKeysMap.set(key.tmsKeyName, key);
+		}
 
 		const diff: InputKeysTMSKeysDiff = {
 			newKeys: [],
@@ -104,7 +152,32 @@ export class TMSClient {
 		return key.key_name[key.platforms[0]] as string;
 	}
 
-	private createTMSCreateKeyDataOfTranslation(key: TranslationKey<SnapshotData>): CreateKeyData {
+	private createTMSKeyFromLokaliseKey(key: Key): TMSKey {
+		if (typeof key.custom_attributes !== "string") {
+			throw new Error("Invalid custom attributes set to key");
+		}
+
+		let customAttributes;
+		try {
+			customAttributes = JSON.parse(key.custom_attributes) as Record<string, any>;
+		} catch {
+			throw new Error("Could not parse custom attributes json");
+		}
+
+		if (!customAttributes?.originalId) {
+			throw new Error("No originalId set to TMS key");
+		}
+
+		return {
+			tmsKeyName: this.getKeyNameFromKey(key),
+			description: key.description,
+			meaning: key.context,
+			tags: key.tags,
+			originalId: customAttributes.originalId,
+		};
+	}
+
+	private createLokaliseCreateKeyDataOfTranslation(key: ExtractedKey<SnapshotData>): CreateKeyData {
 		const snapshotData = key.snapshotData;
 		if (!snapshotData) {
 			throw new Error("Required snapshot data is missing");
@@ -125,15 +198,5 @@ export class TMSClient {
 				"originalId": key.originalId,
 			}),
 		};
-	}
-
-	private createTMSKeyMap(tmsKeys: Key[]): Map<string, Key> {
-		const map = new Map<string, Key>();
-
-		for (const key of tmsKeys) {
-			map.set(this.getKeyNameFromKey(key), key);
-		}
-
-		return map;
 	}
 }

@@ -1,5 +1,5 @@
 import { createHash } from "crypto";
-import { TranslationKey } from "../../translation-key.js";
+import { ExtractedKey } from "../../translation-key.js";
 import { TermsReader } from "./terms-reader.js";
 
 interface JsonInput {
@@ -12,14 +12,14 @@ interface JsonInput {
 }
 
 export class JsonReader implements TermsReader {
-	public parse(input: string): TranslationKey[] {
+	public parse(input: string): ExtractedKey[] {
 		const contents: JsonInput = this.parseJson(input);
 
 		if (!contents?.units || !contents?.srcLang) {
 			throw new Error("Invalid json");
 		}
 
-		const keys: TranslationKey[] = [];
+		const keys: ExtractedKey[] = [];
 		for (const inputKey of contents.units) {
 			keys.push({
 				keyId: createHash("md5").update(inputKey.term).digest('hex'),
