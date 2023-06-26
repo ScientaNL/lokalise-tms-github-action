@@ -1,13 +1,12 @@
 import { create } from '@actions/artifact';
-import { getOctokit } from '@actions/github';
 import { GitHub } from "@actions/github/lib/utils.js";
 import { writeFile } from "fs/promises";
 import { loadAsync } from 'jszip';
 import { rimraf } from "rimraf";
 import { temporaryDirectory } from 'tempy';
 import { SnapshotData } from "../snapshot.js";
-import { TranslationKey } from "../translation-key.js";
-import { TranslationStorage } from "./translationStorage.js";
+import { ExtractedKey } from "../translation-key.js";
+import { TranslationStorage } from "./translation-storage.js";
 
 type Artifact = { updated_at: string, id: number };
 
@@ -29,7 +28,7 @@ export class TranslationStorageUsingGithubArtifacts implements TranslationStorag
 		};
 	}
 
-	public async loadTranslations(): Promise<TranslationKey<SnapshotData>[]> {
+	public async loadTranslations(): Promise<ExtractedKey<SnapshotData>[]> {
 		const artifactIds = await this.getArtifactIdsByArtifactName(this.artifactName);
 
 		if (artifactIds.length <= 0) {
@@ -53,7 +52,7 @@ export class TranslationStorageUsingGithubArtifacts implements TranslationStorag
 
 		const json = await file.async('string');
 
-		return JSON.parse(json) as TranslationKey<SnapshotData>[];
+		return JSON.parse(json) as ExtractedKey<SnapshotData>[];
 	}
 
 	public async removeTranslations(): Promise<void> {
@@ -63,7 +62,7 @@ export class TranslationStorageUsingGithubArtifacts implements TranslationStorag
 		}
 	}
 
-	public async saveTranslations(keys: TranslationKey[]): Promise<void> {
+	public async saveTranslations(keys: ExtractedKey[]): Promise<void> {
 		const tempDir = temporaryDirectory();
 		const path = `${tempDir}/${this.artifactName}`;
 

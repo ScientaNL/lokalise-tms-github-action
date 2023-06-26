@@ -1,10 +1,10 @@
-import { TranslationKey } from "../translation-key.js";
+import { ExtractedKey } from "../translation-key.js";
 
 export interface GithubComments {
 	removeTranslationsComment(): Promise<void>;
 
 	writeTranslationsToPR(
-		keys: TranslationKey[],
+		keys: ExtractedKey[],
 	): Promise<void>;
 }
 

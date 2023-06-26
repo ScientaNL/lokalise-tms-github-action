@@ -1,15 +1,18 @@
-import { Key } from "@lokalise/node-api";
 import { writeFile } from "fs/promises";
+import { EventEmitter } from "node:events";
 import { OutputConfiguration, OutputLocale } from "../../configuration/configuration.js";
-import { getOriginalIdFromKey, getTranslationFromKey, TermsWriter } from "./terms-writer.js";
+import { TMSKeyWithTranslations } from "../../translation-key.js";
+import { getTranslationFromKey, TermsWriter } from "./terms-writer.js";
 
 export class JsonWriter implements TermsWriter {
+	public readonly events: EventEmitter = new EventEmitter();
+
 	constructor(
 		private readonly configuration: OutputConfiguration,
 	) {
 	}
 
-	public async write(keys: Key[]): Promise<void> {
+	public async write(keys: TMSKeyWithTranslations[]): Promise<void> {
 		const contents = this.createFileContents(keys, this.configuration.targetLocale);
 
 		await writeFile(
@@ -18,7 +21,7 @@ export class JsonWriter implements TermsWriter {
 		);
 	}
 
-	private createFileContents(keys: Key[], target: OutputLocale): Record<string, string> {
+	private createFileContents(keys: TMSKeyWithTranslations[], target: OutputLocale): Record<string, string> {
 		const output: Record<string, string> = {};
 		for (const key of keys) {
 			if (!key.translations) {
@@ -30,8 +33,7 @@ export class JsonWriter implements TermsWriter {
 				continue;
 			}
 
-			const originalId = getOriginalIdFromKey(key);
-			output[originalId] = translation?.translation || (this.configuration.useSourceOnEmpty ? originalId : '');
+			output[key.originalId] = translation?.translation || (this.configuration.useSourceOnEmpty ? key.originalId : '');
 		}
 		return output;
 	}

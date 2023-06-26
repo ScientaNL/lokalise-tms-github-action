@@ -1,5 +1,5 @@
 import { GitHub } from "@actions/github/lib/utils.js";
-import { TranslationKey } from "../translation-key.js";
+import { ExtractedKey } from "../translation-key.js";
 import { GithubComments } from "./github-comment.js";
 import { TranslationsSummaryTemplate } from "./translations-summary-template.js";
 
@@ -48,7 +48,7 @@ export class GithubCommentsUsingGithub implements GithubComments {
 		);
 	}
 
-	public async writeTranslationsToPR(keys: TranslationKey[]): Promise<void> {
+	public async writeTranslationsToPR(keys: ExtractedKey[]): Promise<void> {
 		let commentText = this.templateEngine.createMessage(keys);
 
 		if (commentText.length >= 65536 - this.commentMarker.length) {

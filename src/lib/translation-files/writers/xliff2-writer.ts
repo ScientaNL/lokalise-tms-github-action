@@ -1,10 +1,11 @@
-import { Key } from "@lokalise/node-api";
 import { encode, EntityLevel } from "entities";
 import { XMLBuilder } from "fast-xml-parser";
 import { writeFile } from "fs/promises";
+import { EventEmitter } from 'node:events';
 import { OutputConfiguration } from "../../configuration/configuration.js";
+import { TMSKeyWithTranslations } from "../../translation-key.js";
 import { TranslationXml } from "../shared/xliff2/translation-xml.js";
-import { getOriginalIdFromKey, getTranslationFromKey, TermsWriter } from "./terms-writer.js";
+import { getTranslationFromKey, TermsWriter, WriterEvents } from "./terms-writer.js";
 
 export class Xliff2Writer implements TermsWriter {
 	private readonly xliff2Writer = new XMLBuilder({
@@ -14,12 +15,14 @@ export class Xliff2Writer implements TermsWriter {
 		processEntities: false,
 	});
 
+	public readonly events: EventEmitter = new EventEmitter();
+
 	constructor(
 		private readonly configuration: OutputConfiguration,
 	) {
 	}
 
-	public async write(keys: Key[]): Promise<void> {
+	public async write(keys: TMSKeyWithTranslations[]): Promise<void> {
 		const contents = this.createFileContents(keys);
 
 		await writeFile(
@@ -28,7 +31,7 @@ export class Xliff2Writer implements TermsWriter {
 		);
 	}
 
-	private createFileContents(keys: Key[]): string {
+	private createFileContents(keys: TMSKeyWithTranslations[]): string {
 
 		const xmlContent = this.xliff2Writer.build({
 			xliff: {
@@ -51,17 +54,29 @@ export class Xliff2Writer implements TermsWriter {
 		return `@_${attributeName}`;
 	}
 
-	private createUnit(key: Key): Record<string, any> {
-		const source = this.encodeHtml(
-			getTranslationFromKey(key, this.configuration.sourceLocale.tms)?.translation ?? '',
-		);
+	private createUnit(key: TMSKeyWithTranslations): Record<string, any> {
+		let source: string = getTranslationFromKey(key, this.configuration.sourceLocale.tms)?.translation ?? '';
+		let target: string = getTranslationFromKey(key, this.configuration.targetLocale.tms)?.translation ?? '';
 
-		const target = this.encodeHtml(
-			getTranslationFromKey(key, this.configuration.targetLocale.tms)?.translation ?? '',
-		);
+		try {
+			source = this.encodeHtml(source);
+		} catch (e) {
+			this.events.emit(WriterEvents.warn, `Could not encode source HTML for ${key.tmsKeyName} - ${source} - ${e as Error}`);
+			source = '';
+		}
+
+		try {
+			target = this.encodeHtml(target);
+		} catch (e) {
+			this.events.emit(
+				WriterEvents.warn,
+				`Could not encode target HTML for ${key.tmsKeyName} (${this.configuration.targetLocale.tms}) - ${target} - ${e as Error}`,
+			);
+			target = '';
+		}
 
 		return {
-			[this.getAttributeName('id')]: getOriginalIdFromKey(key),
+			[this.getAttributeName('id')]: key.originalId,
 			segment: {
 				[this.getAttributeName('state')]: 'final',
 				source: source,

@@ -1,4 +1,4 @@
-import { getInput, setFailed } from '@actions/core';
+import { getInput, info, setFailed, warning } from '@actions/core';
 import { getOctokit } from '@actions/github';
 import { AddTranslationsSnapshotToTmsCommand } from './commands/add-translations-snapshot-to-tms-command.js';
 import { CreateTranslationFilesCommand } from './commands/create-translation-files-command.js';
@@ -10,10 +10,10 @@ import { GithubCommentsUsingMock } from "./lib/github-pr/github-comment-using-bl
 import { GithubCommentsUsingGithub } from "./lib/github-pr/github-comment-using-github.js";
 import { GithubComments } from './lib/github-pr/github-comment.js';
 import { TranslationsSummaryTemplate } from "./lib/github-pr/translations-summary-template.js";
-import { TMSClient } from './lib/lokalise-api/tms-client.js';
+import { TMSClient, TMSEvents } from './lib/lokalise-api/tms-client.js';
 import { TranslationStorageUsingFilesystem } from "./lib/translation-storage/translation-storage-using-filesystem.js";
 import { TranslationStorageUsingGithubArtifacts } from "./lib/translation-storage/translation-storage-using-github-artifacts.js";
-import { TranslationStorage } from './lib/translation-storage/translationStorage.js';
+import { TranslationStorage } from './lib/translation-storage/translation-storage.js';
 
 (async (): Promise<void> => {
 	try {
@@ -56,11 +56,16 @@ import { TranslationStorage } from './lib/translation-storage/translationStorage
 })();
 
 function getLokaliseTmsClient(config: Configuration['lokalise']): TMSClient {
-	return new TMSClient(
+	const client =  new TMSClient(
 		getInput('lokaliseApi'),
 		getInput('lokaliseProject'),
 		config,
 	);
+
+	client.events.on(TMSEvents.warn, warning);
+	client.events.on(TMSEvents.info, info);
+
+	return client;
 }
 
 function getTranslationStorage(useMock: boolean = false): TranslationStorage {

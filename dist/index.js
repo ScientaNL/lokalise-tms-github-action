@@ -62015,7 +62015,7 @@ class AddTranslationsSnapshotToTmsCommand {
                 yield this.translationStorage.removeTranslations();
                 return;
             }
-            let results = yield this.tmsClient.addProjectKeys(uniqueTranslations);
+            let results = yield this.tmsClient.addKeys(uniqueTranslations);
             results = Object.assign(Object.assign({}, results), { errors: results.errors.filter(error => error.message !== 'This key name is already taken') });
             (0,core.info)(`Add Project Keys complete. ${results.items.length} items added. ${results.errors.length} items resulted in an error`);
             if (results.errors.length) {
@@ -62042,19 +62042,15 @@ var FileTypesEnum;
 
 ;// CONCATENATED MODULE: external "fs/promises"
 const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
+;// CONCATENATED MODULE: external "node:events"
+const external_node_events_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:events");
 ;// CONCATENATED MODULE: ./src/lib/translation-files/writers/terms-writer.ts
-function getOriginalIdFromKey(key) {
-    if (typeof key.custom_attributes !== "string") {
-        throw new Error("Invalid custom attributes set to key");
-    }
-    const customAttributes = JSON.parse(key.custom_attributes);
-    if (!(customAttributes === null || customAttributes === void 0 ? void 0 : customAttributes.originalId)) {
-        throw new Error("No originalId set to TMS key");
-    }
-    return customAttributes.originalId;
-}
+var WriterEvents;
+(function (WriterEvents) {
+    WriterEvents["warn"] = "warn";
+})(WriterEvents = WriterEvents || (WriterEvents = {}));
 function getTranslationFromKey(key, language) {
-    return key.translations.find(({ language_iso }) => language_iso === language);
+    return key.translations.find((key) => key.language === language);
 }
 
 ;// CONCATENATED MODULE: ./src/lib/translation-files/writers/json-writer.ts
@@ -62069,9 +62065,11 @@ var json_writer_awaiter = (undefined && undefined.__awaiter) || function (thisAr
 };
 
 
+
 class JsonWriter {
     constructor(configuration) {
         this.configuration = configuration;
+        this.events = new external_node_events_namespaceObject.EventEmitter();
     }
     write(keys) {
         return json_writer_awaiter(this, void 0, void 0, function* () {
@@ -62089,8 +62087,7 @@ class JsonWriter {
             if (!translation && !this.configuration.useSourceOnEmpty) {
                 continue;
             }
-            const originalId = getOriginalIdFromKey(key);
-            output[originalId] = (translation === null || translation === void 0 ? void 0 : translation.translation) || (this.configuration.useSourceOnEmpty ? originalId : '');
+            output[key.originalId] = (translation === null || translation === void 0 ? void 0 : translation.translation) || (this.configuration.useSourceOnEmpty ? key.originalId : '');
         }
         return output;
     }
@@ -63042,6 +63039,7 @@ var xliff2_writer_awaiter = (undefined && undefined.__awaiter) || function (this
 
 
 
+
 class Xliff2Writer {
     constructor(configuration) {
         this.configuration = configuration;
@@ -63051,6 +63049,7 @@ class Xliff2Writer {
             format: true,
             processEntities: false,
         });
+        this.events = new external_node_events_namespaceObject.EventEmitter();
     }
     write(keys) {
         return xliff2_writer_awaiter(this, void 0, void 0, function* () {
@@ -63079,10 +63078,24 @@ class Xliff2Writer {
     }
     createUnit(key) {
         var _a, _b, _c, _d;
-        const source = this.encodeHtml((_b = (_a = getTranslationFromKey(key, this.configuration.sourceLocale.tms)) === null || _a === void 0 ? void 0 : _a.translation) !== null && _b !== void 0 ? _b : '');
-        const target = this.encodeHtml((_d = (_c = getTranslationFromKey(key, this.configuration.targetLocale.tms)) === null || _c === void 0 ? void 0 : _c.translation) !== null && _d !== void 0 ? _d : '');
+        let source = (_b = (_a = getTranslationFromKey(key, this.configuration.sourceLocale.tms)) === null || _a === void 0 ? void 0 : _a.translation) !== null && _b !== void 0 ? _b : '';
+        let target = (_d = (_c = getTranslationFromKey(key, this.configuration.targetLocale.tms)) === null || _c === void 0 ? void 0 : _c.translation) !== null && _d !== void 0 ? _d : '';
+        try {
+            source = this.encodeHtml(source);
+        }
+        catch (e) {
+            this.events.emit(WriterEvents.warn, `Could not encode source HTML for ${key.tmsKeyName} - ${source} - ${e}`);
+            source = '';
+        }
+        try {
+            target = this.encodeHtml(target);
+        }
+        catch (e) {
+            this.events.emit(WriterEvents.warn, `Could not encode target HTML for ${key.tmsKeyName} (${this.configuration.targetLocale.tms}) - ${target} - ${e}`);
+            target = '';
+        }
         return {
-            [this.getAttributeName('id')]: getOriginalIdFromKey(key),
+            [this.getAttributeName('id')]: key.originalId,
             segment: {
                 [this.getAttributeName('state')]: 'final',
                 source: source,
@@ -63126,6 +63139,7 @@ var create_translation_files_command_awaiter = (undefined && undefined.__awaiter
 };
 
 
+
 class CreateTranslationFilesCommand {
     constructor(configuration, tmsClient) {
         this.configuration = configuration;
@@ -63134,7 +63148,7 @@ class CreateTranslationFilesCommand {
     run() {
         return create_translation_files_command_awaiter(this, void 0, void 0, function* () {
             (0,core.info)(`Get keys currently stored in the TMS`);
-            const tmsKeys = yield this.tmsClient.getProjectKeys(true);
+            const tmsKeys = yield this.tmsClient.getKeysWithTranslations();
             (0,core.info)(`Keys get complete (${tmsKeys.length})`);
             for (const output of this.configuration.outputs) {
                 (0,core.info)(`Generate translation file for ${output.type}:${output.targetLocale.output} - ${output.destination}`);
@@ -63145,6 +63159,7 @@ class CreateTranslationFilesCommand {
     generateOutput(keys, configuration) {
         return create_translation_files_command_awaiter(this, void 0, void 0, function* () {
             const writer = WriterFactory.factory(configuration);
+            writer.events.on(WriterEvents.warn, core.warning);
             yield writer.write(keys);
         });
     }
@@ -63322,9 +63337,9 @@ class ExtractTranslationsAndStoreCommand {
             (0,core.info)(`Read keys from input files`);
             const inputKeys = yield this.parseTermsFiles();
             (0,core.info)(`Fetch keys currently stored in the TMS`);
-            const tmsKeys = yield this.tmsClient.getProjectKeys();
+            const tmsKeys = yield this.tmsClient.getKeys();
             (0,core.info)(`Keys fetched (${tmsKeys.length})`);
-            const { newKeys } = this.tmsClient.diffInputKeysWithTMSKeys(inputKeys, tmsKeys);
+            const { newKeys } = this.tmsClient.diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys);
             if (newKeys.length) {
                 (0,core.info)(`${newKeys.length} New keys found. Store them in the storage.`);
                 yield this.translationStorage.saveTranslations(newKeys);
@@ -64012,8 +64027,6 @@ Object.defineProperties(assert, {
 });
 /* harmony default export */ const is_dist = (is);
 
-;// CONCATENATED MODULE: external "node:events"
-const external_node_events_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:events");
 ;// CONCATENATED MODULE: ./node_modules/p-cancelable/index.js
 class CancelError extends Error {
 	constructor(reason) {
@@ -70656,16 +70669,53 @@ var tms_client_awaiter = (undefined && undefined.__awaiter) || function (thisArg
 };
 
 
+var TMSEvents;
+(function (TMSEvents) {
+    TMSEvents["warn"] = "warn";
+    TMSEvents["info"] = "info";
+})(TMSEvents = TMSEvents || (TMSEvents = {}));
 class TMSClient {
     constructor(apiKey, projectId, configuration) {
         this.projectId = projectId;
         this.configuration = configuration;
         this.limit = 500;
+        this.events = new external_node_events_namespaceObject.EventEmitter();
         this.api = new lokalise_api_LokaliseApi({
             apiKey: apiKey,
         });
     }
-    getProjectKeys(includeTranslations = false) {
+    getKeys() {
+        return tms_client_awaiter(this, void 0, void 0, function* () {
+            const TMSKeys = [];
+            for (const lokaliseKey of yield this.getLokaliseKeys(false)) {
+                try {
+                    TMSKeys.push(this.createTMSKeyFromLokaliseKey(lokaliseKey));
+                }
+                catch (e) {
+                    this.events.emit(TMSEvents.warn, `Could not create a TMSKey for ${JSON.stringify(lokaliseKey.key_name)} - skipping the key. ${e}`);
+                }
+            }
+            return TMSKeys;
+        });
+    }
+    getKeysWithTranslations() {
+        return tms_client_awaiter(this, void 0, void 0, function* () {
+            const TMSKeys = [];
+            for (const lokaliseKey of yield this.getLokaliseKeys(true)) {
+                try {
+                    TMSKeys.push(Object.assign(Object.assign({}, this.createTMSKeyFromLokaliseKey(lokaliseKey)), { translations: lokaliseKey.translations.map((translation) => ({
+                            language: translation.language_iso,
+                            translation: translation.translation,
+                        })) }));
+                }
+                catch (e) {
+                    this.events.emit(TMSEvents.warn, `Could not create a TMSKey for ${JSON.stringify(lokaliseKey.key_name)} - skipping the key. ${e}`);
+                }
+            }
+            return TMSKeys;
+        });
+    }
+    getLokaliseKeys(includeTranslations) {
         return tms_client_awaiter(this, void 0, void 0, function* () {
             let keys = [];
             let cursor = undefined;
@@ -70681,9 +70731,9 @@ class TMSClient {
             return keys;
         });
     }
-    addProjectKeys(keys) {
+    addKeys(keys) {
         return tms_client_awaiter(this, void 0, void 0, function* () {
-            const tmsKeys = keys.map((key) => this.createTMSCreateKeyDataOfTranslation(key));
+            const tmsKeys = keys.map((key) => this.createLokaliseCreateKeyDataOfTranslation(key));
             const aggregatedBulkResult = { items: [], errors: [] };
             if (!tmsKeys.length) {
                 return aggregatedBulkResult;
@@ -70691,7 +70741,7 @@ class TMSClient {
             let index = 0;
             do {
                 const slice = tmsKeys.splice(0, this.limit);
-                (0,core.info)(`Create keys: ${index}-${index + slice.length} of ${keys.length}`);
+                this.events.emit(TMSEvents.info, `Create keys: ${index}-${index + slice.length} of ${keys.length}`);
                 const bulkResult = yield this.api.keys().create({
                     keys: slice,
                 }, {
@@ -70704,8 +70754,11 @@ class TMSClient {
             return aggregatedBulkResult;
         });
     }
-    diffInputKeysWithTMSKeys(inputKeys, tmsKeys) {
-        const tmsKeysMap = this.createTMSKeyMap(tmsKeys);
+    diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys) {
+        const tmsKeysMap = new Map();
+        for (const key of tmsKeys) {
+            tmsKeysMap.set(key.tmsKeyName, key);
+        }
         const diff = {
             newKeys: [],
             obsoleteKeys: [],
@@ -70725,7 +70778,29 @@ class TMSClient {
         }
         return key.key_name[key.platforms[0]];
     }
-    createTMSCreateKeyDataOfTranslation(key) {
+    createTMSKeyFromLokaliseKey(key) {
+        if (typeof key.custom_attributes !== "string") {
+            throw new Error("Invalid custom attributes set to key");
+        }
+        let customAttributes;
+        try {
+            customAttributes = JSON.parse(key.custom_attributes);
+        }
+        catch (_a) {
+            throw new Error("Could not parse custom attributes json");
+        }
+        if (!(customAttributes === null || customAttributes === void 0 ? void 0 : customAttributes.originalId)) {
+            throw new Error("No originalId set to TMS key");
+        }
+        return {
+            tmsKeyName: this.getKeyNameFromKey(key),
+            description: key.description,
+            meaning: key.context,
+            tags: key.tags,
+            originalId: customAttributes.originalId,
+        };
+    }
+    createLokaliseCreateKeyDataOfTranslation(key) {
         var _a, _b;
         const snapshotData = key.snapshotData;
         if (!snapshotData) {
@@ -70745,13 +70820,6 @@ class TMSClient {
                 "originalId": key.originalId,
             }),
         };
-    }
-    createTMSKeyMap(tmsKeys) {
-        const map = new Map();
-        for (const key of tmsKeys) {
-            map.set(this.getKeyNameFromKey(key), key);
-        }
-        return map;
     }
 }
 
@@ -79204,7 +79272,10 @@ var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
     }
 }))();
 function getLokaliseTmsClient(config) {
-    return new TMSClient((0,core.getInput)('lokaliseApi'), (0,core.getInput)('lokaliseProject'), config);
+    const client = new TMSClient((0,core.getInput)('lokaliseApi'), (0,core.getInput)('lokaliseProject'), config);
+    client.events.on(TMSEvents.warn, core.warning);
+    client.events.on(TMSEvents.info, core.info);
+    return client;
 }
 function getTranslationStorage(useMock = false) {
     return !useMock

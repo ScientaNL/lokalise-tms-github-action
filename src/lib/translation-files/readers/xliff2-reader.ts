@@ -1,6 +1,6 @@
 import { decode, EntityLevel } from "entities";
 import { XMLParser } from 'fast-xml-parser';
-import { TranslationKey } from "../../translation-key.js";
+import { ExtractedKey } from "../../translation-key.js";
 import { TranslationXml } from "../shared/xliff2/translation-xml.js";
 import { TermsReader } from "./terms-reader.js";
 
@@ -65,14 +65,14 @@ export class Xliff2Reader implements TermsReader {
 		},
 	});
 
-	public parse(input: string): TranslationKey[] {
+	public parse(input: string): ExtractedKey[] {
 		const xmlData: Xliff2File = this.xliffXmlReader.parse(input);
 
 		if (!xmlData?.xliff?.file?.unit || !xmlData?.xliff?.["@_srcLang"]) {
 			throw new Error("Invalid xliff xml");
 		}
 
-		const keys: TranslationKey[] = [];
+		const keys: ExtractedKey[] = [];
 		for (const inputKey of xmlData.xliff.file.unit) {
 			if (inputKey.segment["#text"].source["#text"] === undefined) { // Accept empty string
 				continue;
@@ -89,7 +89,7 @@ export class Xliff2Reader implements TermsReader {
 		return keys;
 	}
 
-	private createUnit(inputUnit: Xliff2Unit, srcLanguage: string): TranslationKey {
+	private createUnit(inputUnit: Xliff2Unit, srcLanguage: string): ExtractedKey {
 		const {meaning, description} = this.parseNotes(inputUnit?.notes?.note ?? []);
 
 		return {
