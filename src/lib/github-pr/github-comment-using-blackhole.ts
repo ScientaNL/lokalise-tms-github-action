@@ -17,4 +17,3 @@ export class GithubCommentsUsingMock implements GithubComments {
 		console.log(this.templateEngine.createMessage(keys));
 	}
 }
-

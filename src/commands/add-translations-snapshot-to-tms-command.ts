@@ -2,8 +2,6 @@ import { error, info } from '@actions/core';
 import { Command } from '../lib/command.js';
 import { Configuration } from '../lib/configuration/configuration.js';
 import { TMSClient } from '../lib/lokalise-api/tms-client.js';
-import { SnapshotData } from '../lib/snapshot.js';
-import { ExtractedKey } from '../lib/translation-key.js';
 import { TranslationStorage } from '../lib/translation-storage/translation-storage.js';
 
 export class AddTranslationsSnapshotToTmsCommand implements Command {
@@ -15,20 +13,19 @@ export class AddTranslationsSnapshotToTmsCommand implements Command {
 	}
 
 	public async run(): Promise<void> {
-		const translations = await this.translationStorage.loadTranslations();
-		const uniqueTranslations = this.unique(translations);
+		const translations = await this.translationStorage.loadTerms();
 
 		info(
-			`${translations.length} downloaded from storage. ${uniqueTranslations.length} unique translations.`,
+			`${translations.length} downloaded from storage.`,
 		);
 
-		if (uniqueTranslations.length <= 0) {
+		if (translations.length <= 0) {
 			info(`No translations to add to the TMS`);
-			await this.translationStorage.removeTranslations();
+			await this.translationStorage.removeTerms();
 			return;
 		}
 
-		let results = await this.tmsClient.addKeys(uniqueTranslations);
+		let results = await this.tmsClient.addKeys(translations);
 
 		results = {
 			...results,
@@ -45,17 +42,6 @@ export class AddTranslationsSnapshotToTmsCommand implements Command {
 			error(JSON.stringify(results.errors));
 		}
 
-		await this.translationStorage.removeTranslations();
-	}
-
-	private unique(
-		translations: ExtractedKey<SnapshotData>[],
-	): ExtractedKey<SnapshotData>[] {
-		const translationMap = new Map<string, ExtractedKey<SnapshotData>>();
-		for (const translation of translations) {
-			translationMap.set(translation.keyId, translation);
-		}
-
-		return Array.from(translationMap.values());
+		await this.translationStorage.removeTerms();
 	}
 }

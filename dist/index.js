@@ -62007,29 +62007,21 @@ class AddTranslationsSnapshotToTmsCommand {
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            const translations = yield this.translationStorage.loadTranslations();
-            const uniqueTranslations = this.unique(translations);
-            (0,core.info)(`${translations.length} downloaded from storage. ${uniqueTranslations.length} unique translations.`);
-            if (uniqueTranslations.length <= 0) {
+            const translations = yield this.translationStorage.loadTerms();
+            (0,core.info)(`${translations.length} downloaded from storage.`);
+            if (translations.length <= 0) {
                 (0,core.info)(`No translations to add to the TMS`);
-                yield this.translationStorage.removeTranslations();
+                yield this.translationStorage.removeTerms();
                 return;
             }
-            let results = yield this.tmsClient.addKeys(uniqueTranslations);
+            let results = yield this.tmsClient.addKeys(translations);
             results = Object.assign(Object.assign({}, results), { errors: results.errors.filter(error => error.message !== 'This key name is already taken') });
             (0,core.info)(`Add Project Keys complete. ${results.items.length} items added. ${results.errors.length} items resulted in an error`);
             if (results.errors.length) {
                 (0,core.error)(JSON.stringify(results.errors));
             }
-            yield this.translationStorage.removeTranslations();
+            yield this.translationStorage.removeTerms();
         });
-    }
-    unique(translations) {
-        const translationMap = new Map();
-        for (const translation of translations) {
-            translationMap.set(translation.keyId, translation);
-        }
-        return Array.from(translationMap.values());
     }
 }
 
@@ -63387,19 +63379,20 @@ class ExtractTranslationsAndStoreCommand {
         return extract_translations_and_store_command_awaiter(this, void 0, void 0, function* () {
             (0,core.info)(`Read keys from input files`);
             const inputKeys = yield this.parseTermsFiles();
+            const uniqueKeys = this.unique(inputKeys);
             (0,core.info)(`Fetch keys currently stored in the TMS`);
             const tmsKeys = yield this.tmsClient.getKeys();
             (0,core.info)(`Keys fetched (${tmsKeys.length})`);
-            const { newKeys } = this.tmsClient.diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys);
+            const { newKeys } = this.tmsClient.diffExtractedKeysWithTMSKeys(uniqueKeys, tmsKeys);
             if (newKeys.length) {
                 (0,core.info)(`${newKeys.length} New keys found. Store them in the storage.`);
-                yield this.translationStorage.saveTranslations(newKeys);
+                yield this.translationStorage.saveTerms(newKeys);
                 (0,core.info)(`Write comment with new translations to PR`);
                 yield this.githubComments.writeTranslationsToPR(newKeys);
             }
             else {
                 (0,core.info)(`No new keys found. Store result into storage`);
-                yield this.translationStorage.saveTranslations([]);
+                yield this.translationStorage.saveTerms([]);
                 (0,core.info)(`Remove comment from PR (if one)`);
                 yield this.githubComments.removeTranslationsComment();
             }
@@ -63419,6 +63412,13 @@ class ExtractTranslationsAndStoreCommand {
             }
             return keys;
         });
+    }
+    unique(terms) {
+        const translationMap = new Map();
+        for (const term of terms) {
+            translationMap.set(term.keyId, term);
+        }
+        return Array.from(translationMap.values());
     }
 }
 
@@ -63560,7 +63560,7 @@ class GithubCommentsUsingMock {
     writeTranslationsToPR(keys) {
         return github_comment_using_blackhole_awaiter(this, void 0, void 0, function* () {
             console.log("Mock write translations to PR comments");
-            console.log(this.templateEngine.createMessage(keys));
+            // console.log(this.templateEngine.createMessage(keys));
         });
     }
 }
@@ -70970,17 +70970,17 @@ class TranslationStorageUsingFilesystem {
         this.artifactName = `pr-${prNumber}`;
         this.artifactPath = `${path}/${this.artifactName}`;
     }
-    loadTranslations() {
+    loadTerms() {
         return translation_storage_using_filesystem_awaiter(this, void 0, void 0, function* () {
             return JSON.parse(yield (0,promises_namespaceObject.readFile)(this.artifactPath, 'utf-8'));
         });
     }
-    removeTranslations() {
+    removeTerms() {
         return translation_storage_using_filesystem_awaiter(this, void 0, void 0, function* () {
             yield (0,promises_namespaceObject.unlink)(this.artifactPath);
         });
     }
-    saveTranslations(keys) {
+    saveTerms(keys) {
         return translation_storage_using_filesystem_awaiter(this, void 0, void 0, function* () {
             yield (0,promises_namespaceObject.writeFile)(this.artifactPath, JSON.stringify(keys));
             (0,core.info)(`Write translations to ${this.artifactPath}`);
@@ -79292,7 +79292,7 @@ class TranslationStorageUsingGithubArtifacts {
             repo: repository,
         };
     }
-    loadTranslations() {
+    loadTerms() {
         return translation_storage_using_github_artifacts_awaiter(this, void 0, void 0, function* () {
             const artifactIds = yield this.getArtifactIdsByArtifactName(this.artifactName);
             if (artifactIds.length <= 0) {
@@ -79310,7 +79310,7 @@ class TranslationStorageUsingGithubArtifacts {
             return JSON.parse(json);
         });
     }
-    removeTranslations() {
+    removeTerms() {
         return translation_storage_using_github_artifacts_awaiter(this, void 0, void 0, function* () {
             const artifactIds = yield this.getArtifactIdsByArtifactName(this.artifactName);
             for (const artifactId of artifactIds) {
@@ -79318,7 +79318,7 @@ class TranslationStorageUsingGithubArtifacts {
             }
         });
     }
-    saveTranslations(keys) {
+    saveTerms(keys) {
         return translation_storage_using_github_artifacts_awaiter(this, void 0, void 0, function* () {
             const tempDir = temporaryDirectory();
             const path = `${tempDir}/${this.artifactName}`;
