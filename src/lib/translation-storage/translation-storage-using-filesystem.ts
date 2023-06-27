@@ -19,17 +19,17 @@ export class TranslationStorageUsingFilesystem implements TranslationStorage {
 		this.artifactPath = `${path}/${this.artifactName}`;
 	}
 
-	public async loadTranslations(): Promise<ExtractedKey<SnapshotData>[]> {
+	public async loadTerms(): Promise<ExtractedKey<SnapshotData>[]> {
 		return JSON.parse(
 			await readFile(this.artifactPath, 'utf-8'),
 		) as ExtractedKey<SnapshotData>[];
 	}
 
-	public async removeTranslations(): Promise<void> {
+	public async removeTerms(): Promise<void> {
 		await unlink(this.artifactPath);
 	}
 
-	public async saveTranslations(keys: ExtractedKey[]): Promise<void> {
+	public async saveTerms(keys: ExtractedKey[]): Promise<void> {
 		await writeFile(this.artifactPath, JSON.stringify(keys));
 		info(`Write translations to ${this.artifactPath}`);
 	}

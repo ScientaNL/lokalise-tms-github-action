@@ -28,7 +28,7 @@ export class TranslationStorageUsingGithubArtifacts implements TranslationStorag
 		};
 	}
 
-	public async loadTranslations(): Promise<ExtractedKey<SnapshotData>[]> {
+	public async loadTerms(): Promise<ExtractedKey<SnapshotData>[]> {
 		const artifactIds = await this.getArtifactIdsByArtifactName(this.artifactName);
 
 		if (artifactIds.length <= 0) {
@@ -55,14 +55,14 @@ export class TranslationStorageUsingGithubArtifacts implements TranslationStorag
 		return JSON.parse(json) as ExtractedKey<SnapshotData>[];
 	}
 
-	public async removeTranslations(): Promise<void> {
+	public async removeTerms(): Promise<void> {
 		const artifactIds = await this.getArtifactIdsByArtifactName(this.artifactName);
 		for (const artifactId of artifactIds) {
 			await this.deleteArtifactByArtifactId(artifactId);
 		}
 	}
 
-	public async saveTranslations(keys: ExtractedKey[]): Promise<void> {
+	public async saveTerms(keys: ExtractedKey[]): Promise<void> {
 		const tempDir = temporaryDirectory();
 		const path = `${tempDir}/${this.artifactName}`;
 

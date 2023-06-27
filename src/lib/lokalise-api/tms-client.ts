@@ -4,8 +4,8 @@ import { Configuration } from "../configuration/configuration.js";
 import { SnapshotData } from "../snapshot.js";
 import { ExtractedKey, TMSKey, TMSKeyWithTranslations } from "../translation-key.js";
 
-interface InputKeysTMSKeysDiff {
-	newKeys: ExtractedKey[];
+interface InputKeysTMSKeysDiff<T> {
+	newKeys: ExtractedKey<T>[];
 	obsoleteKeys: TMSKey[];
 }
 
@@ -117,17 +117,17 @@ export class TMSClient {
 		return aggregatedBulkResult;
 	}
 
-	public diffExtractedKeysWithTMSKeys(
-		inputKeys: ExtractedKey[],
+	public diffExtractedKeysWithTMSKeys<T>(
+		inputKeys: ExtractedKey<T>[],
 		tmsKeys: TMSKey[],
-	): InputKeysTMSKeysDiff {
+	): InputKeysTMSKeysDiff<T> {
 		const tmsKeysMap = new Map<string, TMSKey>();
 
 		for (const key of tmsKeys) {
 			tmsKeysMap.set(key.originalId, key);
 		}
 
-		const diff: InputKeysTMSKeysDiff = {
+		const diff: InputKeysTMSKeysDiff<T> = {
 			newKeys: [],
 			obsoleteKeys: [],
 		};

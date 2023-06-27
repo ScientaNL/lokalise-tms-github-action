@@ -7,7 +7,8 @@ This project contains a GitHub Action which can be used in various actions to cr
 At Scienta, we use the following flow:
 - On `PR create` a GitHub action checks if the PR (HEAD ref) contains new translations, compared to the TMS (Lokalise). The new translations are stored in a Github Actions Artifact and a comment is added to the PR.
 - On `PR merge` the stored translations are added to the TMS and can be translated by translators.
-- On `release` all keys are retrieved from the TMS and translation files are generated
+- On `release` all keys are retrieved from the TMS and translation files are generated.
+- On `workflow_dispatch` or `schedule` Remove obsolete keys or tag them to mark them as obsolete.
 
 ## Usage
 Checkout the various test-workflows in the `./test-workflows` directory. This Action can be used as a GitHub Action step. You have to specify the command you want to execute.
@@ -32,4 +33,5 @@ npm run build && npm run command:extract-translations
 npm run build && npm run command:add-snapshot
 npm run build && npm run command:create-translation-files
 npm run build && npm run command:cleanup-obsolete-keys
+npm run build && npm run command:tag-obsolete-keys
 ```

@@ -21,22 +21,23 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 	public async run(): Promise<void> {
 		info(`Read keys from input files`);
 		const inputKeys = await this.parseTermsFiles();
+		const uniqueKeys = this.unique<SnapshotData>(inputKeys);
 
 		info(`Fetch keys currently stored in the TMS`);
 		const tmsKeys = await this.tmsClient.getKeys();
 		info(`Keys fetched (${tmsKeys.length})`);
 
-		const {newKeys} = this.tmsClient.diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys);
+		const {newKeys} = this.tmsClient.diffExtractedKeysWithTMSKeys<SnapshotData>(uniqueKeys, tmsKeys);
 
 		if (newKeys.length) {
 			info(`${newKeys.length} New keys found. Store them in the storage.`);
-			await this.translationStorage.saveTranslations(newKeys);
+			await this.translationStorage.saveTerms(newKeys);
 
 			info(`Write comment with new translations to PR`);
 			await this.githubComments.writeTranslationsToPR(newKeys);
 		} else {
 			info(`No new keys found. Store result into storage`);
-			await this.translationStorage.saveTranslations([]);
+			await this.translationStorage.saveTerms([]);
 
 			info(`Remove comment from PR (if one)`);
 			await this.githubComments.removeTranslationsComment();
@@ -63,5 +64,16 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 		}
 
 		return keys;
+	}
+
+	private unique<T>(
+		terms: ExtractedKey<T>[],
+	): ExtractedKey<T>[] {
+		const translationMap = new Map<string, ExtractedKey<T>>();
+		for (const term of terms) {
+			translationMap.set(term.keyId, term);
+		}
+
+		return Array.from(translationMap.values());
 	}
 }
