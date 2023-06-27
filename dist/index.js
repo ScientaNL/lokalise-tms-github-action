@@ -62033,6 +62033,8 @@ class AddTranslationsSnapshotToTmsCommand {
     }
 }
 
+;// CONCATENATED MODULE: external "fs/promises"
+const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
 ;// CONCATENATED MODULE: ./src/lib/configuration/file-types.enum.ts
 var FileTypesEnum;
 (function (FileTypesEnum) {
@@ -62040,56 +62042,31 @@ var FileTypesEnum;
     FileTypesEnum["JSON"] = "json";
 })(FileTypesEnum = FileTypesEnum || (FileTypesEnum = {}));
 
-;// CONCATENATED MODULE: external "fs/promises"
-const promises_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("fs/promises");
-;// CONCATENATED MODULE: external "node:events"
-const external_node_events_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:events");
-;// CONCATENATED MODULE: ./src/lib/translation-files/writers/terms-writer.ts
-var WriterEvents;
-(function (WriterEvents) {
-    WriterEvents["warn"] = "warn";
-})(WriterEvents = WriterEvents || (WriterEvents = {}));
-function getTranslationFromKey(key, language) {
-    return key.translations.find((key) => key.language === language);
-}
+// EXTERNAL MODULE: external "crypto"
+var external_crypto_ = __nccwpck_require__(6113);
+;// CONCATENATED MODULE: ./src/lib/translation-files/readers/json-reader.ts
 
-;// CONCATENATED MODULE: ./src/lib/translation-files/writers/json-writer.ts
-var json_writer_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-
-
-
-class JsonWriter {
-    constructor(configuration) {
-        this.configuration = configuration;
-        this.events = new external_node_events_namespaceObject.EventEmitter();
-    }
-    write(keys) {
-        return json_writer_awaiter(this, void 0, void 0, function* () {
-            const contents = this.createFileContents(keys, this.configuration.targetLocale);
-            yield (0,promises_namespaceObject.writeFile)(this.configuration.destination, JSON.stringify(contents, null, 4));
-        });
-    }
-    createFileContents(keys, target) {
-        const output = {};
-        for (const key of keys) {
-            if (!key.translations) {
-                throw new Error("Translations property is missing. Have you loaded the data with translations included?");
-            }
-            const translation = getTranslationFromKey(key, target.tms);
-            if (!translation && !this.configuration.useSourceOnEmpty) {
-                continue;
-            }
-            output[key.originalId] = (translation === null || translation === void 0 ? void 0 : translation.translation) || (this.configuration.useSourceOnEmpty ? key.originalId : '');
+class JsonReader {
+    parse(input) {
+        const contents = this.parseJson(input);
+        if (!(contents === null || contents === void 0 ? void 0 : contents.units) || !(contents === null || contents === void 0 ? void 0 : contents.srcLang)) {
+            throw new Error("Invalid json");
         }
-        return output;
+        const keys = [];
+        for (const inputKey of contents.units) {
+            keys.push({
+                keyId: (0,external_crypto_.createHash)("md5").update(inputKey.term).digest('hex'),
+                originalId: inputKey.term,
+                term: inputKey.term,
+                srcLang: contents.srcLang,
+                description: null,
+                meaning: null,
+            });
+        }
+        return keys;
+    }
+    parseJson(inputPath) {
+        return JSON.parse(inputPath);
     }
 }
 
@@ -63024,6 +63001,227 @@ TranslationXml.xmlWriter = new fxp.XMLBuilder({
     unpairedTags: ["ph"],
 });
 
+;// CONCATENATED MODULE: ./src/lib/translation-files/readers/xliff2-reader.ts
+
+
+
+class Xliff2Reader {
+    constructor() {
+        this.xliffXmlReader = new fxp.XMLParser({
+            ignoreAttributes: false,
+            attributeNamePrefix: "@_",
+            alwaysCreateTextNode: true,
+            processEntities: false,
+            stopNodes: ["*.segment"],
+            isArray: (name, jpath) => {
+                return [
+                    "xliff.file.unit",
+                    "xliff.file.unit.notes.note",
+                ].includes(jpath);
+            },
+            tagValueProcessor: (tagName, tagValue) => {
+                if (tagName === 'segment') {
+                    return this.parseSegment(tagValue);
+                }
+                return tagValue;
+            },
+        });
+    }
+    parse(input) {
+        var _a, _b, _c, _d;
+        const xmlData = this.xliffXmlReader.parse(input);
+        if (!((_b = (_a = xmlData === null || xmlData === void 0 ? void 0 : xmlData.xliff) === null || _a === void 0 ? void 0 : _a.file) === null || _b === void 0 ? void 0 : _b.unit) || !((_c = xmlData === null || xmlData === void 0 ? void 0 : xmlData.xliff) === null || _c === void 0 ? void 0 : _c["@_srcLang"])) {
+            throw new Error("Invalid xliff xml");
+        }
+        const keys = [];
+        for (const inputKey of xmlData.xliff.file.unit) {
+            if (inputKey.segment["#text"].source["#text"] === undefined) { // Accept empty string
+                continue;
+            }
+            keys.push(this.createUnit(inputKey, (_d = xmlData === null || xmlData === void 0 ? void 0 : xmlData.xliff) === null || _d === void 0 ? void 0 : _d["@_srcLang"]));
+        }
+        return keys;
+    }
+    createUnit(inputUnit, srcLanguage) {
+        var _a, _b;
+        const { meaning, description } = this.parseNotes((_b = (_a = inputUnit === null || inputUnit === void 0 ? void 0 : inputUnit.notes) === null || _a === void 0 ? void 0 : _a.note) !== null && _b !== void 0 ? _b : []);
+        return {
+            keyId: inputUnit["@_id"],
+            originalId: inputUnit["@_id"],
+            term: inputUnit.segment["#text"].source["#text"],
+            meaning: meaning !== null && meaning !== void 0 ? meaning : null,
+            description: description !== null && description !== void 0 ? description : null,
+            srcLang: srcLanguage,
+        };
+    }
+    parseNotes(notes) {
+        var _a, _b;
+        const grouped = notes.reduce((acc, curr) => {
+            var _a;
+            acc[curr["@_category"]] = [...((_a = acc[curr["@_category"]]) !== null && _a !== void 0 ? _a : []), curr["#text"]];
+            return acc;
+        }, { location: [], description: [], meaning: [] });
+        return {
+            description: (_a = grouped.description) === null || _a === void 0 ? void 0 : _a[0],
+            meaning: (_b = grouped.meaning) === null || _b === void 0 ? void 0 : _b[0],
+            locations: grouped.location,
+        };
+    }
+    parseSegment(input) {
+        var _a;
+        input = this.dedent(input);
+        const segmentParts = TranslationXml.stringToXmlTree(`<root>${input}</root>`, true);
+        const source = (_a = segmentParts.find((part) => !!part.source)) === null || _a === void 0 ? void 0 : _a.source;
+        if (!source) {
+            throw new Error(`Could not find source in ${input}`);
+        }
+        return {
+            source: {
+                '#text': this.parseSource(source),
+            },
+        };
+    }
+    parseSource(source) {
+        TranslationXml.traverseTextNodes(source, (text) => {
+            return decode(text, EntityLevel.HTML)
+                .replace("<", "&lt;")
+                .replace(">", "&gt;");
+        });
+        return TranslationXml.xmlTreeToString(source);
+    }
+    dedent(string) {
+        var _a, _b, _c;
+        const lines = string.split("\n");
+        if (((_a = lines === null || lines === void 0 ? void 0 : lines[0].trim()) === null || _a === void 0 ? void 0 : _a.length) === 0) {
+            lines.splice(0, 1);
+        }
+        if (lines.length > 0 && ((_b = lines === null || lines === void 0 ? void 0 : lines[lines.length - 1].trim()) === null || _b === void 0 ? void 0 : _b.length) === 0) {
+            lines.splice(lines.length - 1, 1);
+        }
+        const minIndent = (_c = Math.min(...lines.map((line) => { var _a, _b; return (_b = (_a = line.match(/^\s+/)) === null || _a === void 0 ? void 0 : _a[0].length) !== null && _b !== void 0 ? _b : 0; }))) !== null && _c !== void 0 ? _c : 0;
+        return lines.map((line) => line.substring(minIndent)).join('\n');
+    }
+}
+
+;// CONCATENATED MODULE: ./src/lib/translation-files/reader-factory.ts
+
+
+
+class ReaderFactory {
+    static factory(type) {
+        switch (type) {
+            case FileTypesEnum.XLIFF2:
+                return new Xliff2Reader();
+            case FileTypesEnum.JSON:
+                return new JsonReader();
+            default:
+                throw new Error(`invalid file type.`);
+        }
+    }
+}
+
+;// CONCATENATED MODULE: ./src/commands/cleanup-obsolete-keys-command.ts
+var cleanup_obsolete_keys_command_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+class CleanupObsoleteKeysCommand {
+    constructor(configuration, tmsClient) {
+        this.configuration = configuration;
+        this.tmsClient = tmsClient;
+    }
+    run() {
+        return cleanup_obsolete_keys_command_awaiter(this, void 0, void 0, function* () {
+            (0,core.info)(`Read keys from input files`);
+            const inputKeys = yield this.parseTermsFiles();
+            (0,core.info)(`Fetch keys currently stored in the TMS`);
+            const tmsKeys = yield this.tmsClient.getKeys();
+            (0,core.info)(`Keys fetched (${tmsKeys.length})`);
+            const { obsoleteKeys } = this.tmsClient.diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys);
+            if (!obsoleteKeys.length) {
+                (0,core.info)(`No obsolete keys found`);
+                return;
+            }
+            (0,core.info)(`${obsoleteKeys.length} Obsolete ${obsoleteKeys.length === 1 ? 'key' : 'keys'} found`);
+            const result = yield this.tmsClient.removeKeys(obsoleteKeys);
+            if (!result.keys_removed) {
+                (0,core.warning)(`Error while deleting obsolete keys`);
+            }
+            (0,core.info)(`Obsolete keys deleted`);
+        });
+    }
+    parseTermsFiles() {
+        return cleanup_obsolete_keys_command_awaiter(this, void 0, void 0, function* () {
+            let keys = [];
+            for (const source of this.configuration.terms) {
+                const reader = yield ReaderFactory.factory(source.type);
+                const input = yield (0,promises_namespaceObject.readFile)(source.terms, 'utf-8');
+                keys = [...keys, ...reader.parse(input)];
+            }
+            return keys;
+        });
+    }
+}
+
+;// CONCATENATED MODULE: external "node:events"
+const external_node_events_namespaceObject = __WEBPACK_EXTERNAL_createRequire(import.meta.url)("node:events");
+;// CONCATENATED MODULE: ./src/lib/translation-files/writers/terms-writer.ts
+var WriterEvents;
+(function (WriterEvents) {
+    WriterEvents["warn"] = "warn";
+})(WriterEvents = WriterEvents || (WriterEvents = {}));
+function getTranslationFromKey(key, language) {
+    return key.translations.find((key) => key.language === language);
+}
+
+;// CONCATENATED MODULE: ./src/lib/translation-files/writers/json-writer.ts
+var json_writer_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+class JsonWriter {
+    constructor(configuration) {
+        this.configuration = configuration;
+        this.events = new external_node_events_namespaceObject.EventEmitter();
+    }
+    write(keys) {
+        return json_writer_awaiter(this, void 0, void 0, function* () {
+            const contents = this.createFileContents(keys, this.configuration.targetLocale);
+            yield (0,promises_namespaceObject.writeFile)(this.configuration.destination, JSON.stringify(contents, null, 4));
+        });
+    }
+    createFileContents(keys, target) {
+        const output = {};
+        for (const key of keys) {
+            if (!key.translations) {
+                throw new Error("Translations property is missing. Have you loaded the data with translations included?");
+            }
+            const translation = getTranslationFromKey(key, target.tms);
+            if (!translation && !this.configuration.useSourceOnEmpty) {
+                continue;
+            }
+            output[key.originalId] = (translation === null || translation === void 0 ? void 0 : translation.translation) || (this.configuration.useSourceOnEmpty ? key.originalId : '');
+        }
+        return output;
+    }
+}
+
 ;// CONCATENATED MODULE: ./src/lib/translation-files/writers/xliff2-writer.ts
 var xliff2_writer_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -63165,153 +63363,6 @@ class CreateTranslationFilesCommand {
     }
 }
 
-// EXTERNAL MODULE: external "crypto"
-var external_crypto_ = __nccwpck_require__(6113);
-;// CONCATENATED MODULE: ./src/lib/translation-files/readers/json-reader.ts
-
-class JsonReader {
-    parse(input) {
-        const contents = this.parseJson(input);
-        if (!(contents === null || contents === void 0 ? void 0 : contents.units) || !(contents === null || contents === void 0 ? void 0 : contents.srcLang)) {
-            throw new Error("Invalid json");
-        }
-        const keys = [];
-        for (const inputKey of contents.units) {
-            keys.push({
-                keyId: (0,external_crypto_.createHash)("md5").update(inputKey.term).digest('hex'),
-                originalId: inputKey.term,
-                term: inputKey.term,
-                srcLang: contents.srcLang,
-                description: null,
-                meaning: null,
-            });
-        }
-        return keys;
-    }
-    parseJson(inputPath) {
-        return JSON.parse(inputPath);
-    }
-}
-
-;// CONCATENATED MODULE: ./src/lib/translation-files/readers/xliff2-reader.ts
-
-
-
-class Xliff2Reader {
-    constructor() {
-        this.xliffXmlReader = new fxp.XMLParser({
-            ignoreAttributes: false,
-            attributeNamePrefix: "@_",
-            alwaysCreateTextNode: true,
-            processEntities: false,
-            stopNodes: ["*.segment"],
-            isArray: (name, jpath) => {
-                return [
-                    "xliff.file.unit",
-                    "xliff.file.unit.notes.note",
-                ].includes(jpath);
-            },
-            tagValueProcessor: (tagName, tagValue) => {
-                if (tagName === 'segment') {
-                    return this.parseSegment(tagValue);
-                }
-                return tagValue;
-            },
-        });
-    }
-    parse(input) {
-        var _a, _b, _c, _d;
-        const xmlData = this.xliffXmlReader.parse(input);
-        if (!((_b = (_a = xmlData === null || xmlData === void 0 ? void 0 : xmlData.xliff) === null || _a === void 0 ? void 0 : _a.file) === null || _b === void 0 ? void 0 : _b.unit) || !((_c = xmlData === null || xmlData === void 0 ? void 0 : xmlData.xliff) === null || _c === void 0 ? void 0 : _c["@_srcLang"])) {
-            throw new Error("Invalid xliff xml");
-        }
-        const keys = [];
-        for (const inputKey of xmlData.xliff.file.unit) {
-            if (inputKey.segment["#text"].source["#text"] === undefined) { // Accept empty string
-                continue;
-            }
-            keys.push(this.createUnit(inputKey, (_d = xmlData === null || xmlData === void 0 ? void 0 : xmlData.xliff) === null || _d === void 0 ? void 0 : _d["@_srcLang"]));
-        }
-        return keys;
-    }
-    createUnit(inputUnit, srcLanguage) {
-        var _a, _b;
-        const { meaning, description } = this.parseNotes((_b = (_a = inputUnit === null || inputUnit === void 0 ? void 0 : inputUnit.notes) === null || _a === void 0 ? void 0 : _a.note) !== null && _b !== void 0 ? _b : []);
-        return {
-            keyId: inputUnit["@_id"],
-            originalId: inputUnit["@_id"],
-            term: inputUnit.segment["#text"].source["#text"],
-            meaning: meaning !== null && meaning !== void 0 ? meaning : null,
-            description: description !== null && description !== void 0 ? description : null,
-            srcLang: srcLanguage,
-        };
-    }
-    parseNotes(notes) {
-        var _a, _b;
-        const grouped = notes.reduce((acc, curr) => {
-            var _a;
-            acc[curr["@_category"]] = [...((_a = acc[curr["@_category"]]) !== null && _a !== void 0 ? _a : []), curr["#text"]];
-            return acc;
-        }, { location: [], description: [], meaning: [] });
-        return {
-            description: (_a = grouped.description) === null || _a === void 0 ? void 0 : _a[0],
-            meaning: (_b = grouped.meaning) === null || _b === void 0 ? void 0 : _b[0],
-            locations: grouped.location,
-        };
-    }
-    parseSegment(input) {
-        var _a;
-        input = this.dedent(input);
-        const segmentParts = TranslationXml.stringToXmlTree(`<root>${input}</root>`, true);
-        const source = (_a = segmentParts.find((part) => !!part.source)) === null || _a === void 0 ? void 0 : _a.source;
-        if (!source) {
-            throw new Error(`Could not find source in ${input}`);
-        }
-        return {
-            source: {
-                '#text': this.parseSource(source),
-            },
-        };
-    }
-    parseSource(source) {
-        TranslationXml.traverseTextNodes(source, (text) => {
-            return decode(text, EntityLevel.HTML)
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-        });
-        return TranslationXml.xmlTreeToString(source);
-    }
-    dedent(string) {
-        var _a, _b, _c;
-        const lines = string.split("\n");
-        if (((_a = lines === null || lines === void 0 ? void 0 : lines[0].trim()) === null || _a === void 0 ? void 0 : _a.length) === 0) {
-            lines.splice(0, 1);
-        }
-        if (lines.length > 0 && ((_b = lines === null || lines === void 0 ? void 0 : lines[lines.length - 1].trim()) === null || _b === void 0 ? void 0 : _b.length) === 0) {
-            lines.splice(lines.length - 1, 1);
-        }
-        const minIndent = (_c = Math.min(...lines.map((line) => { var _a, _b; return (_b = (_a = line.match(/^\s+/)) === null || _a === void 0 ? void 0 : _a[0].length) !== null && _b !== void 0 ? _b : 0; }))) !== null && _c !== void 0 ? _c : 0;
-        return lines.map((line) => line.substring(minIndent)).join('\n');
-    }
-}
-
-;// CONCATENATED MODULE: ./src/lib/translation-files/reader-factory.ts
-
-
-
-class ReaderFactory {
-    static factory(type) {
-        switch (type) {
-            case FileTypesEnum.XLIFF2:
-                return new Xliff2Reader();
-            case FileTypesEnum.JSON:
-                return new JsonReader();
-            default:
-                throw new Error(`invalid file type.`);
-        }
-    }
-}
-
 ;// CONCATENATED MODULE: ./src/commands/extract-translations-and-store-command.ts
 var extract_translations_and_store_command_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -63371,6 +63422,61 @@ class ExtractTranslationsAndStoreCommand {
     }
 }
 
+;// CONCATENATED MODULE: ./src/commands/tag-obsolete-keys-command.ts
+var tag_obsolete_keys_command_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+
+
+
+class TagObsoleteKeysCommand {
+    constructor(configuration, tmsClient) {
+        this.configuration = configuration;
+        this.tmsClient = tmsClient;
+        if (!configuration.lokalise.obsoleteKeyTag) {
+            throw new Error("No tag set to tag obsolete keys");
+        }
+        this.obsoleteKeyTag = configuration.lokalise.obsoleteKeyTag;
+    }
+    run() {
+        return tag_obsolete_keys_command_awaiter(this, void 0, void 0, function* () {
+            (0,core.info)(`Read keys from input files`);
+            const inputKeys = yield this.parseTermsFiles();
+            (0,core.info)(`Fetch keys currently stored in the TMS`);
+            const tmsKeys = yield this.tmsClient.getKeys();
+            (0,core.info)(`Keys fetched (${tmsKeys.length})`);
+            const { obsoleteKeys } = this.tmsClient.diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys);
+            if (!obsoleteKeys.length) {
+                (0,core.info)(`No obsolete keys found`);
+                return;
+            }
+            (0,core.info)(`${obsoleteKeys.length} Obsolete ${obsoleteKeys.length === 1 ? 'key' : 'keys'} found`);
+            const result = yield this.tmsClient.tagKeys(obsoleteKeys, this.obsoleteKeyTag);
+            if (result.errors.length) {
+                (0,core.warning)(`Error while tagging obsolete keys`);
+            }
+            (0,core.info)(`Obsolete keys tagged with ${this.obsoleteKeyTag}`);
+        });
+    }
+    parseTermsFiles() {
+        return tag_obsolete_keys_command_awaiter(this, void 0, void 0, function* () {
+            let keys = [];
+            for (const source of this.configuration.terms) {
+                const reader = yield ReaderFactory.factory(source.type);
+                const input = yield (0,promises_namespaceObject.readFile)(source.terms, 'utf-8');
+                keys = [...keys, ...reader.parse(input)];
+            }
+            return keys;
+        });
+    }
+}
+
 // EXTERNAL MODULE: ./node_modules/yaml/dist/index.js
 var dist = __nccwpck_require__(4083);
 // EXTERNAL MODULE: ./node_modules/joi/lib/index.js
@@ -63405,6 +63511,7 @@ const configValidator = lib_default().object({
     })),
     lokalise: lib_default().object({
         platforms: lib_default().array().items(lib_default().string()),
+        obsoleteKeyTag: lib_default().string().optional(),
     }),
 });
 
@@ -70757,16 +70864,18 @@ class TMSClient {
     diffExtractedKeysWithTMSKeys(inputKeys, tmsKeys) {
         const tmsKeysMap = new Map();
         for (const key of tmsKeys) {
-            tmsKeysMap.set(key.tmsKeyName, key);
+            tmsKeysMap.set(key.originalId, key);
         }
         const diff = {
             newKeys: [],
             obsoleteKeys: [],
         };
         for (const inputKey of inputKeys) {
-            if (!tmsKeysMap.has(inputKey.keyId)) {
+            if (!tmsKeysMap.has(inputKey.originalId)) {
                 diff.newKeys.push(inputKey);
-                tmsKeysMap.delete(inputKey.keyId);
+            }
+            else {
+                tmsKeysMap.delete(inputKey.originalId);
             }
         }
         diff.obsoleteKeys = Array.from(tmsKeysMap.values());
@@ -70793,6 +70902,7 @@ class TMSClient {
             throw new Error("No originalId set to TMS key");
         }
         return {
+            tmsId: key.key_id,
             tmsKeyName: this.getKeyNameFromKey(key),
             description: key.description,
             meaning: key.context,
@@ -70820,6 +70930,26 @@ class TMSClient {
                 "originalId": key.originalId,
             }),
         };
+    }
+    removeKeys(TMSKeys) {
+        return tms_client_awaiter(this, void 0, void 0, function* () {
+            return yield this.api.keys().bulk_delete(TMSKeys.map(({ tmsId }) => tmsId), {
+                project_id: this.projectId,
+            });
+        });
+    }
+    tagKeys(keys, tagName) {
+        return tms_client_awaiter(this, void 0, void 0, function* () {
+            return yield this.api.keys().bulk_update({
+                keys: keys.map((key) => ({
+                    tags: [tagName],
+                    merge_tags: true,
+                    key_id: key.tmsId,
+                })),
+            }, {
+                project_id: this.projectId,
+            });
+        });
     }
 }
 
@@ -79247,6 +79377,8 @@ var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
 
 
 
+
+
 (() => main_awaiter(void 0, void 0, void 0, function* () {
     try {
         const config = yield loadConfig((0,core.getInput)('actions-rc'));
@@ -79262,8 +79394,14 @@ var main_awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arg
             case 'createTranslationFiles':
                 app = new CreateTranslationFilesCommand(config, getLokaliseTmsClient(config.lokalise));
                 break;
+            case 'cleanupObsoleteKeys':
+                app = new CleanupObsoleteKeysCommand(config, getLokaliseTmsClient(config.lokalise));
+                break;
+            case 'tagObsoleteKeys':
+                app = new TagObsoleteKeysCommand(config, getLokaliseTmsClient(config.lokalise));
+                break;
             default:
-                throw new Error('Invalid command configured in the action (extract, addSnapshot, createTranslationFiles)');
+                throw new Error('Invalid command configured in the action (extract, addSnapshot, createTranslationFiles, cleanupObsoleteKeys)');
         }
         yield app.run();
     }

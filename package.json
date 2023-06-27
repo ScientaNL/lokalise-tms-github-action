@@ -9,7 +9,9 @@
 		"test": "jest",
 		"command:extract-translations": "bin/act -b -W test-workflows/extract-translations.yml -C . --secret-file .env -e test-workflows/extract-translations.payload.json pull_request",
 		"command:add-snapshot": "bin/act -b -W test-workflows/add-snapshot.yml -C . --secret-file .env -e test-workflows/add-snapshot.payload.json pull_request",
-		"command:create-translation-files": "bin/act -b -W test-workflows/create-translation-files.yml -C . --secret-file .env release"
+		"command:create-translation-files": "bin/act -b -W test-workflows/create-translation-files.yml -C . --secret-file .env release",
+		"command:cleanup-obsolete-keys": "bin/act -b -W test-workflows/cleanup-obsolete-keys.yml -C . --secret-file .env workflow_dispatch",
+		"command:tag-obsolete-keys": "bin/act -b -W test-workflows/tag-obsolete-keys.yml -C . --secret-file .env workflow_dispatch"
 	},
 	"type": "module",
 	"repository": {

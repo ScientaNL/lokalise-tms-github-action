@@ -30,6 +30,7 @@ export interface Configuration {
 	outputs: OutputConfiguration[],
 	lokalise: {
 		platforms: ('web')[],
+		obsoleteKeyTag?: string,
 	}
 }
 
@@ -65,5 +66,6 @@ export const configValidator = Joi.object({
 	),
 	lokalise: Joi.object({
 		platforms: Joi.array().items(Joi.string()),
+		obsoleteKeyTag: Joi.string().optional(),
 	}),
 });

@@ -1,8 +1,10 @@
 import { getInput, info, setFailed, warning } from '@actions/core';
 import { getOctokit } from '@actions/github';
 import { AddTranslationsSnapshotToTmsCommand } from './commands/add-translations-snapshot-to-tms-command.js';
+import { CleanupObsoleteKeysCommand } from "./commands/cleanup-obsolete-keys-command.js";
 import { CreateTranslationFilesCommand } from './commands/create-translation-files-command.js';
 import { ExtractTranslationsAndStoreCommand } from './commands/extract-translations-and-store-command.js';
+import { TagObsoleteKeysCommand } from "./commands/tag-obsolete-keys-command.js";
 import { Command } from './lib/command.js';
 import { loadConfig } from './lib/configuration/config-parser.js';
 import { Configuration } from './lib/configuration/configuration.js';
@@ -43,9 +45,21 @@ import { TranslationStorage } from './lib/translation-storage/translation-storag
 					getLokaliseTmsClient(config.lokalise),
 				);
 				break;
+			case 'cleanupObsoleteKeys':
+				app = new CleanupObsoleteKeysCommand(
+					config,
+					getLokaliseTmsClient(config.lokalise),
+				);
+				break;
+			case 'tagObsoleteKeys':
+				app = new TagObsoleteKeysCommand(
+					config,
+					getLokaliseTmsClient(config.lokalise),
+				);
+				break;
 			default:
 				throw new Error(
-					'Invalid command configured in the action (extract, addSnapshot, createTranslationFiles)',
+					'Invalid command configured in the action (extract, addSnapshot, createTranslationFiles, cleanupObsoleteKeys)',
 				);
 		}
 

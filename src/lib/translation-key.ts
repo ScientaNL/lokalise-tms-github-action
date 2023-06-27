@@ -9,6 +9,7 @@ export interface ExtractedKey<SNAPSHOTDATA = unknown> {
 }
 
 export interface TMSKey {
+	tmsId: number;
 	tmsKeyName: string;
 	description: string;
 	tags: string[];

@@ -124,7 +124,7 @@ export class TMSClient {
 		const tmsKeysMap = new Map<string, TMSKey>();
 
 		for (const key of tmsKeys) {
-			tmsKeysMap.set(key.tmsKeyName, key);
+			tmsKeysMap.set(key.originalId, key);
 		}
 
 		const diff: InputKeysTMSKeysDiff = {
@@ -133,9 +133,10 @@ export class TMSClient {
 		};
 
 		for (const inputKey of inputKeys) {
-			if (!tmsKeysMap.has(inputKey.keyId)) {
+			if (!tmsKeysMap.has(inputKey.originalId)) {
 				diff.newKeys.push(inputKey);
-				tmsKeysMap.delete(inputKey.keyId);
+			} else {
+				tmsKeysMap.delete(inputKey.originalId);
 			}
 		}
 
@@ -169,6 +170,7 @@ export class TMSClient {
 		}
 
 		return {
+			tmsId: key.key_id,
 			tmsKeyName: this.getKeyNameFromKey(key),
 			description: key.description,
 			meaning: key.context,
@@ -198,5 +200,34 @@ export class TMSClient {
 				"originalId": key.originalId,
 			}),
 		};
+	}
+
+	public async removeKeys(TMSKeys: TMSKey[]): Promise<{
+		project_id: string,
+		keys_removed: boolean,
+		keys_locked: number,
+	}> {
+		return await this.api.keys().bulk_delete(
+			TMSKeys.map(({tmsId}) => tmsId),
+			{
+				project_id: this.projectId,
+			},
+		);
+	}
+
+	public async tagKeys(keys: TMSKey[], tagName: string) {
+		return await this.api.keys().bulk_update(
+			{
+				keys: keys.map((key) => ({
+						tags: [tagName],
+						merge_tags: true,
+						key_id: key.tmsId,
+					}),
+				),
+			},
+			{
+				project_id: this.projectId,
+			}
+		);
 	}
 }
