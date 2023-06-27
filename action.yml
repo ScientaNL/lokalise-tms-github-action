@@ -6,7 +6,7 @@ runs:
   main: 'dist/index.js'
 inputs:
   command:
-    description: 'Command of the github action (extract, addSnapshot, createTranslationFiles)'
+    description: 'Command of the github action (extract, addSnapshot, createTranslationFiles, cleanupObsoleteKeys, tagObsoleteKeys)'
     required: true
   actions-rc:
     description: 'actions rc (configuration) file'

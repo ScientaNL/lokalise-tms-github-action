@@ -1,11 +1,9 @@
-name: Add extracted translations snapshot to TMS
+name: Cleanup obsolete keys
 on:
-  pull_request:
-    types: [ closed ]
+  workflow_dispatch:
 jobs:
-  add-snapshot-to-tms:
+  extract-translations:
     runs-on: ubuntu-latest
-    if: github.event.pull_request.merged == true
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -14,14 +12,15 @@ jobs:
         uses: ./
         with:
           actions-rc: ./test-workflows/.translate-actionrc.yml
-          command: addSnapshot
+          command: cleanupObsoleteKeys
           mockGithub: true
 
           lokaliseApi: ${{ secrets.LOKALISE_API }}
           lokaliseProject: ${{ secrets.LOKALISE_PROJECT }}
-          lokaliseSourceLanguageCode: source
 
           token: ${{ secrets.GITHUB_TOKEN }}
           pr_number: ${{ github.event.number }}
           owner: ScientaNL
           repo: lokalise-tms-github-action
+
+          mockStoragePath: ./test-workflows/tmp

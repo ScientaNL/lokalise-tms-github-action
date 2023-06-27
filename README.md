@@ -31,4 +31,5 @@ Run:
 npm run build && npm run command:extract-translations
 npm run build && npm run command:add-snapshot
 npm run build && npm run command:create-translation-files
+npm run build && npm run command:cleanup-obsolete-keys
 ```
