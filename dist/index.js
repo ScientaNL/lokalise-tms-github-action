@@ -61988,6 +61988,10 @@ var __webpack_exports__ = {};
 var core = __nccwpck_require__(2186);
 // EXTERNAL MODULE: ./node_modules/@actions/github/lib/github.js
 var github = __nccwpck_require__(5438);
+;// CONCATENATED MODULE: ./src/lib/translation-storage/missing-artifact-file.ts
+class MissingArtifactFile extends Error {
+}
+
 ;// CONCATENATED MODULE: ./src/commands/add-translations-snapshot-to-tms-command.ts
 var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
@@ -61999,6 +62003,7 @@ var __awaiter = (undefined && undefined.__awaiter) || function (thisArg, _argume
     });
 };
 
+
 class AddTranslationsSnapshotToTmsCommand {
     constructor(configuration, tmsClient, translationStorage) {
         this.configuration = configuration;
@@ -62007,7 +62012,17 @@ class AddTranslationsSnapshotToTmsCommand {
     }
     run() {
         return __awaiter(this, void 0, void 0, function* () {
-            const translations = yield this.translationStorage.loadTerms();
+            let translations;
+            try {
+                translations = yield this.translationStorage.loadTerms();
+            }
+            catch (e) {
+                if (e instanceof MissingArtifactFile && !this.configuration.errorOnMissingSnapshot) {
+                    (0,core.warning)(e.message);
+                    return;
+                }
+                throw e;
+            }
             (0,core.info)(`${translations.length} downloaded from storage.`);
             if (translations.length <= 0) {
                 (0,core.info)(`No translations to add to the TMS`);
@@ -63513,6 +63528,7 @@ const configValidator = lib_default().object({
         platforms: lib_default().array().items(lib_default().string()),
         obsoleteKeyTag: lib_default().string().optional(),
     }),
+    errorOnMissingSnapshot: lib_default().boolean(),
 });
 
 ;// CONCATENATED MODULE: ./src/lib/configuration/config-parser.ts
@@ -63560,7 +63576,7 @@ class GithubCommentsUsingMock {
     writeTranslationsToPR(keys) {
         return github_comment_using_blackhole_awaiter(this, void 0, void 0, function* () {
             console.log("Mock write translations to PR comments");
-            // console.log(this.templateEngine.createMessage(keys));
+            console.log(this.templateEngine.createMessage(keys));
         });
     }
 }
@@ -70965,6 +70981,7 @@ var translation_storage_using_filesystem_awaiter = (undefined && undefined.__awa
 };
 
 
+
 class TranslationStorageUsingFilesystem {
     constructor(path, prNumber) {
         this.artifactName = `pr-${prNumber}`;
@@ -70972,7 +70989,12 @@ class TranslationStorageUsingFilesystem {
     }
     loadTerms() {
         return translation_storage_using_filesystem_awaiter(this, void 0, void 0, function* () {
-            return JSON.parse(yield (0,promises_namespaceObject.readFile)(this.artifactPath, 'utf-8'));
+            try {
+                return JSON.parse(yield (0,promises_namespaceObject.readFile)(this.artifactPath, 'utf-8'));
+            }
+            catch (e) {
+                throw new MissingArtifactFile(`Could not find artifact ${this.artifactName}`);
+            }
         });
     }
     removeTerms() {
@@ -79283,6 +79305,7 @@ var translation_storage_using_github_artifacts_awaiter = (undefined && undefined
 
 
 
+
 class TranslationStorageUsingGithubArtifacts {
     constructor(github, repositoryOwner, repository, prNumber) {
         this.github = github;
@@ -79296,7 +79319,7 @@ class TranslationStorageUsingGithubArtifacts {
         return translation_storage_using_github_artifacts_awaiter(this, void 0, void 0, function* () {
             const artifactIds = yield this.getArtifactIdsByArtifactName(this.artifactName);
             if (artifactIds.length <= 0) {
-                throw new Error(`Could not find artifact ${this.artifactName}`);
+                throw new MissingArtifactFile(`Could not find artifact ${this.artifactName}`);
             }
             const artifact = yield this.github.rest.actions.downloadArtifact(Object.assign(Object.assign({}, this.repositoryParams), { artifact_id: artifactIds[0], archive_format: 'zip' }));
             if (!(artifact.data instanceof ArrayBuffer)) {

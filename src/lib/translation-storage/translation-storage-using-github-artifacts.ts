@@ -6,6 +6,7 @@ import { rimraf } from "rimraf";
 import { temporaryDirectory } from 'tempy';
 import { SnapshotData } from "../snapshot.js";
 import { ExtractedKey } from "../translation-key.js";
+import { MissingArtifactFile } from "./missing-artifact-file.js";
 import { TranslationStorage } from "./translation-storage.js";
 
 type Artifact = { updated_at: string, id: number };
@@ -32,7 +33,7 @@ export class TranslationStorageUsingGithubArtifacts implements TranslationStorag
 		const artifactIds = await this.getArtifactIdsByArtifactName(this.artifactName);
 
 		if (artifactIds.length <= 0) {
-			throw new Error(`Could not find artifact ${this.artifactName}`);
+			throw new MissingArtifactFile(`Could not find artifact ${this.artifactName}`);
 		}
 
 		const artifact = await this.github.rest.actions.downloadArtifact({

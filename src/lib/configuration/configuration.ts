@@ -31,7 +31,8 @@ export interface Configuration {
 	lokalise: {
 		platforms: ('web')[],
 		obsoleteKeyTag?: string,
-	}
+	},
+	errorOnMissingSnapshot: boolean,
 }
 
 export const configValidator = Joi.object({
@@ -68,4 +69,5 @@ export const configValidator = Joi.object({
 		platforms: Joi.array().items(Joi.string()),
 		obsoleteKeyTag: Joi.string().optional(),
 	}),
+	errorOnMissingSnapshot: Joi.boolean(),
 });
