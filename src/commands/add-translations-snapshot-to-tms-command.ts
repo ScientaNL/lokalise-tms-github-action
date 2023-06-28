@@ -1,7 +1,10 @@
-import { error, info } from '@actions/core';
+import { error, info, warning } from '@actions/core';
 import { Command } from '../lib/command.js';
 import { Configuration } from '../lib/configuration/configuration.js';
 import { TMSClient } from '../lib/lokalise-api/tms-client.js';
+import { SnapshotData } from "../lib/snapshot.js";
+import { ExtractedKey } from "../lib/translation-key.js";
+import { MissingArtifactFile } from "../lib/translation-storage/missing-artifact-file.js";
 import { TranslationStorage } from '../lib/translation-storage/translation-storage.js';
 
 export class AddTranslationsSnapshotToTmsCommand implements Command {
@@ -13,11 +16,20 @@ export class AddTranslationsSnapshotToTmsCommand implements Command {
 	}
 
 	public async run(): Promise<void> {
-		const translations = await this.translationStorage.loadTerms();
+		let translations: ExtractedKey<SnapshotData>[];
 
-		info(
-			`${translations.length} downloaded from storage.`,
-		);
+		try {
+			translations = await this.translationStorage.loadTerms();
+		} catch (e) {
+			if (e instanceof MissingArtifactFile && !this.configuration.errorOnMissingSnapshot) {
+				warning(e.message);
+				return;
+			}
+
+			throw e;
+		}
+
+		info(`${translations.length} downloaded from storage.`);
 
 		if (translations.length <= 0) {
 			info(`No translations to add to the TMS`);

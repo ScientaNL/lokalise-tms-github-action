@@ -3,9 +3,8 @@ import { readFile, unlink, writeFile } from "fs/promises";
 import { loadAsync } from 'jszip';
 import { SnapshotData } from "../snapshot.js";
 import { ExtractedKey } from "../translation-key.js";
+import { MissingArtifactFile } from "./missing-artifact-file.js";
 import { TranslationStorage } from "./translation-storage.js";
-
-type Artifact = { updated_at: string, id: number };
 
 export class TranslationStorageUsingFilesystem implements TranslationStorage {
 	private readonly artifactName: string;
@@ -20,9 +19,13 @@ export class TranslationStorageUsingFilesystem implements TranslationStorage {
 	}
 
 	public async loadTerms(): Promise<ExtractedKey<SnapshotData>[]> {
-		return JSON.parse(
-			await readFile(this.artifactPath, 'utf-8'),
-		) as ExtractedKey<SnapshotData>[];
+		try {
+			return JSON.parse(
+				await readFile(this.artifactPath, 'utf-8'),
+			) as ExtractedKey<SnapshotData>[];
+		} catch (e) {
+			throw new MissingArtifactFile(`Could not find artifact ${this.artifactName}`);
+		}
 	}
 
 	public async removeTerms(): Promise<void> {
