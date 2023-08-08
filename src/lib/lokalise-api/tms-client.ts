@@ -193,6 +193,8 @@ export class TMSClient {
 			translations: snapshotData.importInLocales.map((locale) => ({
 					language_iso: locale,
 					translation: key.term,
+					is_reviewed: false,
+					is_unverified: true,
 				}),
 			),
 			tags: [snapshotData.tag],
@@ -227,7 +229,7 @@ export class TMSClient {
 			},
 			{
 				project_id: this.projectId,
-			}
+			},
 		);
 	}
 }
