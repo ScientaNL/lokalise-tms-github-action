@@ -31,7 +31,7 @@
 		"@lokalise/node-api": "^9.8.1",
 		"ejs": "^3.1.9",
 		"entities": "^4.5.0",
-		"fast-xml-parser": "^4.0.12",
+		"fast-xml-parser": "^4.2.7",
 		"joi": "^17.9.2",
 		"jszip": "^3.10.1",
 		"rimraf": "^5.0.1",
