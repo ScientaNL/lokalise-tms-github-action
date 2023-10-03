@@ -22,6 +22,7 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 		info(`Read keys from input files`);
 		const inputKeys = await this.parseTermsFiles();
 		const uniqueKeys = this.unique<SnapshotData>(inputKeys);
+		info(`Read ${inputKeys.length} keys, of which ${uniqueKeys.length} were unique`);
 
 		info(`Fetch keys currently stored in the TMS`);
 		const tmsKeys = await this.tmsClient.getKeys();
@@ -47,7 +48,7 @@ export class ExtractTranslationsAndStoreCommand implements Command {
 	private async parseTermsFiles(): Promise<ExtractedKey<SnapshotData>[]> {
 		let keys: ExtractedKey<SnapshotData>[] = [];
 		for (const source of this.configuration.terms) {
-			const reader = await ReaderFactory.factory(source.type);
+			const reader = ReaderFactory.factory(source.type);
 			const input = await readFile(source.terms, 'utf-8');
 
 			const associatedSnapshotData = this.configuration.snapshots.find(

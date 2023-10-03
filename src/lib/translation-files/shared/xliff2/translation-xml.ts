@@ -1,3 +1,4 @@
+import { decode, encode, EntityLevel } from "entities";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
 
 export type SourceXmlNode = Record<string, SourceXmlNode[]> & {
@@ -61,5 +62,15 @@ export class TranslationXml {
 				}
 			}
 		}
+	}
+
+	public static encode(text: string): string {
+		let preparsed = text.replace("&lt;", "<").replace("&gt;", ">");
+		return encode(preparsed, EntityLevel.XML);
+	}
+
+	public static decode(text: string): string {
+		const decoded = decode(text, EntityLevel.HTML);
+		return decoded.replace("<", "&lt;").replace(">", "&gt;");
 	}
 }

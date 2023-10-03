@@ -88,7 +88,7 @@ export class Xliff2Writer implements TermsWriter {
 	private encodeHtml(input: string): string {
 		const tree = TranslationXml.stringToXmlTree(`<root>${input}</root>`, true);
 
-		TranslationXml.traverseTextNodes(tree, (text) => encode(text, EntityLevel.XML));
+		TranslationXml.traverseTextNodes(tree, (text) => TranslationXml.encode(text));
 
 		return TranslationXml.xmlTreeToString(tree);
 	}
