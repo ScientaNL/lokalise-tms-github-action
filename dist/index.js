@@ -13083,10 +13083,19 @@ Builder.prototype.j2x = function(jObj, level) {
   let val = '';
   for (let key in jObj) {
     if (typeof jObj[key] === 'undefined') {
-      // supress undefined node
+      // supress undefined node only if it is not an attribute
+      if (this.isAttribute(key)) {
+        val += '';
+      }
     } else if (jObj[key] === null) {
-      if(key[0] === "?") val += this.indentate(level) + '<' + key + '?' + this.tagEndChar;
-      else val += this.indentate(level) + '<' + key + '/' + this.tagEndChar;
+      // null attribute should be ignored by the attribute list, but should not cause the tag closing
+      if (this.isAttribute(key)) {
+        val += '';
+      } else if (key[0] === '?') {
+        val += this.indentate(level) + '<' + key + '?' + this.tagEndChar;
+      } else {
+        val += this.indentate(level) + '<' + key + '/' + this.tagEndChar;
+      }
       // val += this.indentate(level) + '<' + key + '/' + this.tagEndChar;
     } else if (jObj[key] instanceof Date) {
       val += this.buildTextValNode(jObj[key], key, '', level);
@@ -13179,7 +13188,8 @@ Builder.prototype.buildObjectNode = function(val, key, attrStr, level) {
       tagEndExp = "";
     }
   
-    if (attrStr && val.indexOf('<') === -1) {
+    // attrStr is an empty string in case the attribute came as undefined or null
+    if ((attrStr || attrStr === '') && val.indexOf('<') === -1) {
       return ( this.indentate(level) + '<' +  key + attrStr + piClosingChar + '>' + val + tagEndExp );
     } else if (this.options.commentPropName !== false && key === this.options.commentPropName && piClosingChar.length === 0) {
       return this.indentate(level) + `<!--${val}-->` + this.newLine;
@@ -13252,7 +13262,7 @@ function indentate(level) {
 }
 
 function isAttribute(name /*, options*/) {
-  if (name.startsWith(this.options.attributeNamePrefix)) {
+  if (name.startsWith(this.options.attributeNamePrefix) && name !== this.options.textNodeName) {
     return name.substr(this.attrPrefixLen);
   } else {
     return false;
@@ -13403,7 +13413,9 @@ module.exports = toXml;
 /***/ }),
 
 /***/ 6072:
-/***/ ((module) => {
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const util = __nccwpck_require__(8280);
 
 //TODO: handle comments
 function readDocType(xmlData, i){
@@ -13426,7 +13438,7 @@ function readDocType(xmlData, i){
                     i += 7; 
                     [entityName, val,i] = readEntityExp(xmlData,i+1);
                     if(val.indexOf("&") === -1) //Parameter entities are not supported
-                        entities[ entityName ] = {
+                        entities[ validateEntityName(entityName) ] = {
                             regx : RegExp( `&${entityName};`,"g"),
                             val: val
                         };
@@ -13547,7 +13559,15 @@ function isNotation(xmlData, i){
     return false
 }
 
+function validateEntityName(name){
+    if (util.isName(name))
+	return name;
+    else
+        throw new Error(`Invalid entity name ${name}`);
+}
+
 module.exports = readDocType;
+
 
 /***/ }),
 
@@ -13951,6 +13971,7 @@ const parseXml = function(xmlData) {
           if(tagExp.length > 0 && tagExp.lastIndexOf("/") === tagExp.length - 1){
             if(tagName[tagName.length - 1] === "/"){ //remove trailing '/'
               tagName = tagName.substr(0, tagName.length - 1);
+              jPath = jPath.substr(0, jPath.length - 1);
               tagExp = tagName;
             }else{
               tagExp = tagExp.substr(0, tagExp.length - 1);
@@ -62077,6 +62098,8 @@ class JsonReader {
     }
 }
 
+// EXTERNAL MODULE: ./node_modules/fast-xml-parser/src/fxp.js
+var fxp = __nccwpck_require__(2603);
 ;// CONCATENATED MODULE: ./node_modules/entities/lib/esm/generated/decode-data-html.js
 // Generated using scripts/write-decode-map.ts
 /* harmony default export */ const decode_data_html = (new Uint16Array(
@@ -62956,9 +62979,8 @@ function encode(data, options = EntityLevel.XML) {
 
 
 //# sourceMappingURL=index.js.map
-// EXTERNAL MODULE: ./node_modules/fast-xml-parser/src/fxp.js
-var fxp = __nccwpck_require__(2603);
 ;// CONCATENATED MODULE: ./src/lib/translation-files/shared/xliff2/translation-xml.ts
+
 
 class TranslationXml {
     constructor() {
@@ -62989,6 +63011,14 @@ class TranslationXml {
             }
         }
     }
+    static encode(text) {
+        let preparsed = text.replace("&lt;", "<").replace("&gt;", ">");
+        return encode(preparsed, EntityLevel.XML);
+    }
+    static decode(text) {
+        const decoded = decode(text, EntityLevel.HTML);
+        return decoded.replace("<", "&lt;").replace(">", "&gt;");
+    }
 }
 TranslationXml.xmlReader = new fxp.XMLParser({
     ignoreAttributes: false,
@@ -63009,7 +63039,6 @@ TranslationXml.xmlWriter = new fxp.XMLBuilder({
 });
 
 ;// CONCATENATED MODULE: ./src/lib/translation-files/readers/xliff2-reader.ts
-
 
 
 class Xliff2Reader {
@@ -63089,11 +63118,7 @@ class Xliff2Reader {
         };
     }
     parseSource(source) {
-        TranslationXml.traverseTextNodes(source, (text) => {
-            return decode(text, EntityLevel.HTML)
-                .replace("<", "&lt;")
-                .replace(">", "&gt;");
-        });
+        TranslationXml.traverseTextNodes(source, (text) => TranslationXml.decode(text));
         return TranslationXml.xmlTreeToString(source);
     }
     dedent(string) {
@@ -63244,7 +63269,6 @@ var xliff2_writer_awaiter = (undefined && undefined.__awaiter) || function (this
 
 
 
-
 class Xliff2Writer {
     constructor(configuration) {
         this.configuration = configuration;
@@ -63310,7 +63334,7 @@ class Xliff2Writer {
     }
     encodeHtml(input) {
         const tree = TranslationXml.stringToXmlTree(`<root>${input}</root>`, true);
-        TranslationXml.traverseTextNodes(tree, (text) => encode(text, EntityLevel.XML));
+        TranslationXml.traverseTextNodes(tree, (text) => TranslationXml.encode(text));
         return TranslationXml.xmlTreeToString(tree);
     }
 }
@@ -63395,6 +63419,7 @@ class ExtractTranslationsAndStoreCommand {
             (0,core.info)(`Read keys from input files`);
             const inputKeys = yield this.parseTermsFiles();
             const uniqueKeys = this.unique(inputKeys);
+            (0,core.info)(`Read ${inputKeys.length} keys, of which ${uniqueKeys.length} were unique`);
             (0,core.info)(`Fetch keys currently stored in the TMS`);
             const tmsKeys = yield this.tmsClient.getKeys();
             (0,core.info)(`Keys fetched (${tmsKeys.length})`);
@@ -63417,7 +63442,7 @@ class ExtractTranslationsAndStoreCommand {
         return extract_translations_and_store_command_awaiter(this, void 0, void 0, function* () {
             let keys = [];
             for (const source of this.configuration.terms) {
-                const reader = yield ReaderFactory.factory(source.type);
+                const reader = ReaderFactory.factory(source.type);
                 const input = yield (0,promises_namespaceObject.readFile)(source.terms, 'utf-8');
                 const associatedSnapshotData = this.configuration.snapshots.find(({ tag }) => tag === source.tag);
                 keys = [
@@ -69553,7 +69578,7 @@ class pkg_LokalisePkg {
     static async getVersion() {
         let pkg;
         try {
-            pkg = JSON.parse((await (0,promises_namespaceObject.readFile)(new URL(pkg_LokalisePkg.pkgPath(), "file:///home/hmojet/development/lokalise-tms-github-action/node_modules/@lokalise/node-api/dist/lokalise/pkg.js"))).toString());
+            pkg = JSON.parse((await (0,promises_namespaceObject.readFile)(new URL(pkg_LokalisePkg.pkgPath(), "file:///home/anner/code/lokalise-tms-github-action/node_modules/@lokalise/node-api/dist/lokalise/pkg.js"))).toString());
         }
         catch (_e) {
             pkg = null;
@@ -70940,6 +70965,8 @@ class TMSClient {
             translations: snapshotData.importInLocales.map((locale) => ({
                 language_iso: locale,
                 translation: key.term,
+                is_reviewed: false,
+                is_unverified: true,
             })),
             tags: [snapshotData.tag],
             custom_attributes: JSON.stringify({

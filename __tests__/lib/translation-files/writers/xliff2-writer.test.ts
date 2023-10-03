@@ -151,11 +151,11 @@ test('XLIFF2 special chars', async () => {
 			originalId: "1332434532",
 			translations: [
 				{
-					translation: "This is a test & more ©",
+					translation: "This is a &lt; test & more ©",
 					language: "en-US",
 				},
 				{
-					translation: "Dit is een test & meer ©",
+					translation: "Dit is een &gt; test & meer ©",
 					language: "nl",
 				},
 			],
@@ -171,8 +171,8 @@ test('XLIFF2 special chars', async () => {
   <file original="ng.template" id="ngi18n">
     <unit id="1332434532">
       <segment state="final">
-        <source>This is a test &amp; more &#xa9;</source>
-        <target>Dit is een test &amp; meer &#xa9;</target>
+        <source>This is a &lt; test &amp; more &#xa9;</source>
+        <target>Dit is een &gt; test &amp; meer &#xa9;</target>
       </segment>
     </unit>
   </file>

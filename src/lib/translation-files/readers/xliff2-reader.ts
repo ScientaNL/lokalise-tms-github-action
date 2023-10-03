@@ -137,11 +137,7 @@ export class Xliff2Reader implements TermsReader {
 	}
 
 	private parseSource(source: SourceXmlNode[]): string {
-		TranslationXml.traverseTextNodes(source, (text) => {
-			return decode(text, EntityLevel.HTML)
-				.replace("<", "&lt;")
-				.replace(">", "&gt;");
-		});
+		TranslationXml.traverseTextNodes(source, (text) => TranslationXml.decode(text));
 
 		return TranslationXml.xmlTreeToString(source);
 	}
