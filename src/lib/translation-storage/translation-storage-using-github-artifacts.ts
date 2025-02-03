@@ -1,4 +1,4 @@
-import { create } from '@actions/artifact';
+import { DefaultArtifactClient } from '@actions/artifact';
 import { GitHub } from "@actions/github/lib/utils.js";
 import { writeFile } from "fs/promises";
 import { loadAsync } from 'jszip';
@@ -69,19 +69,12 @@ export class TranslationStorageUsingGithubArtifacts implements TranslationStorag
 
 		await writeFile(path, JSON.stringify(keys));
 
-		const githubArtifactClient = create();
-		const response = await githubArtifactClient.uploadArtifact(
+		const githubArtifactClient = new DefaultArtifactClient();
+		await githubArtifactClient.uploadArtifact(
 			this.artifactName,
 			[path],
 			tempDir,
-			{
-				continueOnError: false,
-			},
 		);
-
-		if (response.failedItems.length) {
-			throw new Error(`Could not upload artifact ${this.artifactName}`);
-		}
 
 		await rimraf(tempDir);
 	}
